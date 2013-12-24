@@ -45,6 +45,7 @@ class Connection extends \Doctrine\DBAL\Connection
     const PORTABILITY_DRIZZLE           = 13;
     const PORTABILITY_SQLANYWHERE       = 13;
     const PORTABILITY_SQLSRV            = 13;
+    const PORTABILITY_INFORMIX          = 13;
 
     /**
      * @var integer
@@ -79,6 +80,8 @@ class Connection extends \Doctrine\DBAL\Connection
                     $params['portability'] = self::PORTABILITY_DB2;
                 } elseif ($this->_platform->getName() === 'mssql') {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_SQLSRV;
+                } else if ($this->_platform->getName() === 'informix') {
+                    $params['portability'] = $params['portability'] & self::PORTABILITY_INFORMIX;
                 } else {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_OTHERVENDORS;
                 }

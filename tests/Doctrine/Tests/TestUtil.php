@@ -19,6 +19,7 @@ class TestUtil
      * 'db_host' : The hostname of the database to connect to.
      * 'db_server' : The server name of the database to connect to
      *               (optional, some vendors allow multiple server instances with different names on the same host).
+     * 'db_protocol' : The protocol for make connection (optional).
      * 'db_name' : The name of the database to connect to.
      * 'db_port' : The port of the database to connect to.
      *
@@ -59,12 +60,20 @@ class TestUtil
                 $realDbParams['server'] = $GLOBALS['db_server'];
             }
 
+            if (isset($GLOBALS['db_protocol'])) {
+                $realDbParams['protocol'] = $GLOBALS['db_protocol'];
+            }
+
             if (isset($GLOBALS['db_unix_socket'])) {
                 $realDbParams['unix_socket'] = $GLOBALS['db_unix_socket'];
             }
 
             if (isset($GLOBALS['tmpdb_server'])) {
                 $tmpDbParams['server'] = $GLOBALS['tmpdb_server'];
+            }
+
+            if (isset($GLOBALS['tmpdb_protocol'])) {
+                $tmpDbParams['protocol'] = $GLOBALS['tmpdb_protocol'];
             }
 
             if (isset($GLOBALS['tmpdb_unix_socket'])) {
@@ -136,6 +145,14 @@ class TestUtil
 
         if (isset($GLOBALS['tmpdb_server'])) {
             $tmpDbParams['server'] = $GLOBALS['tmpdb_server'];
+        }
+
+        if (isset($GLOBALS['tmpdb_protocol'])) {
+            $tmpDbParams['protocol'] = $GLOBALS['tmpdb_protocol'];
+        }
+
+        if (isset($GLOBALS['db_unix_socket'])) {
+            $realDbParams['unix_socket'] = $GLOBALS['db_unix_socket'];
         }
 
         // Connect to tmpdb in order to drop and create the real test db.

@@ -682,5 +682,19 @@ class DataAccessTest extends \Doctrine\Tests\DbalFunctionalTestCase
 
 class MyFetchClass
 {
-    public $test_int, $test_string, $test_datetime;
+
+    protected $cols = array();
+
+    public function __set($name, $value) {
+
+      $this->cols[strtolower($name)] = $value;
+
+    }
+
+    public function __get($name) {
+
+      return $this->cols[strtolower($name)];
+
+    }
+
 }
