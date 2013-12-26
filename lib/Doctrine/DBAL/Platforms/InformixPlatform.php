@@ -42,7 +42,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getBlobTypeDeclarationSQL(array $field)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'BYTE';
     }
 
     /**
@@ -53,11 +53,13 @@ class InformixPlatform extends AbstractPlatform
         $this->doctrineTypeMapping = array(
             'bigint'            => 'bigint',
             'bigserial'         => 'bigint',
+            'blob'              => 'blob',
             'boolean'           => 'boolean',
-            'byte'              => 'smallint',
+            'byte'              => 'blob',
             'character'         => 'string',
             'character varying' => 'string',
             'char'              => 'string',
+            'clob'              => 'text',
             'date'              => 'date',
             'datetime'          => 'datetime',
             'dec'               => 'decimal',
@@ -76,6 +78,7 @@ class InformixPlatform extends AbstractPlatform
             'serial'            => 'integer',
             'smallfloat'        => 'decimal',
             'smallint'          => 'smallint',
+            'text'              => 'text',
             'varchar'           => 'string',
         );
     }
@@ -95,7 +98,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getClobTypeDeclarationSQL(array $field)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'TEXT';
     }
 
     /**
@@ -116,6 +119,15 @@ class InformixPlatform extends AbstractPlatform
     public function getIdentifierQuoteCharacter()
     {
         return '';
+    }
+
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function getMaxIdentifierLength()
+    {
+        return 128;
     }
 
     /**
