@@ -35,6 +35,11 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     /**
      * {@inheritdoc}
      *
+     * Note: The attribute PDO::ATTR_STRINGIFY_FETCHES is set to true in the
+     * database handle so that the LOB types are fetched as the real values
+     * instead of a resource. The value can be overwritten with other value
+     * in the driver options array. 
+     *
      * @throws \Doctrine\DBAL\DBALException
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
@@ -42,9 +47,11 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
 
         $dsn = $this->_constructPdoDsn($params);
 
+        $driverOptions += array(\PDO::ATTR_STRINGIFY_FETCHES => true);
+
         try {
 
-            return $conn = new \Doctrine\DBAL\Driver\PDOInformix\Connection(
+            return new \Doctrine\DBAL\Driver\PDOInformix\Connection(
                 $dsn,
                 $username,
                 $password,
