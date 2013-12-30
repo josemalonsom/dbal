@@ -35,10 +35,46 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     /**
      * {@inheritdoc}
      *
-     * Note: The attribute PDO::ATTR_STRINGIFY_FETCHES is set to true in the
-     * database handle so that the LOB types are fetched as the real values
-     * instead of a resource. The value can be overwritten with other value
-     * in the driver options array. 
+     * 
+     * The params array must have the following keys/values:
+     *
+     * - 'dbname': The name of the database to connect to.
+     * - 'host': The host name of the database to connect to.
+     * - 'port': The port of the database to connecto to (optional, some
+     *           protocols do not use port, e.g. ipcshm).
+     * - 'protocol': The protocol to use in the connection.
+     * - 'server': The server name of the database to connect to.
+     *
+     * Example:
+     *
+     * <code>
+     *
+     *    use Doctrine\DBAL\Driver\PDOInformix\Driver;
+     *  
+     *    $connectionParams = array(
+     *        'dbname'       => 'test',
+     *        'host'         => 'test-1',
+     *        'port'         => '50000',
+     *        'protocol'     => 'onsoctcp',
+     *        'server'       => 'test1tcp',
+     *    );
+     *    
+     *    $driverOptions = array();
+     *
+     *    $username = 'user';
+     *    $password = 'passwd';
+     *  
+     *    $driver = new Driver();
+     *  
+     *    $conn = $driver->connect($connectionParams, $username,
+     *        $password, $driverOptions);
+     *
+     * </code>
+     *
+     * Note: The attribute PDO::ATTR_STRINGIFY_FETCHES is set to true by
+     * default in the database handle so that the LOB types are fetched as
+     * the real values instead of a resource. The value can be overwritten
+     * with other value in the driver options array. 
      *
      * @throws \Doctrine\DBAL\DBALException
      */
@@ -70,8 +106,9 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
      * @param array $params
      * @return string The DSN.
      * @throws \Doctrine\DBAL\DBALException
+     * @see \Doctrine\DBAL\Driver::connect
      */
-    private function _constructPdoDsn(array $params)
+    protected function _constructPdoDsn(array $params)
     {
 
         if ( empty($params['dbname']) ) {
