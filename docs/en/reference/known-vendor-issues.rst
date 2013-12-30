@@ -195,3 +195,11 @@ to convert a character type value to a binary type value even if
 you explicitly define the value as ``\PDO::PARAM_LOB`` type.
 Therefore it is highly encouraged to use the native ``sqlsrv``
 driver instead which does not have this limitation.
+
+IBM Informix
+--------------------
+
+Unique and NULL
+~~~~~~~~~~~~~~~
+
+Like Microsoft SQL server, IBM Informix only allows one NULL in a unique column.
