@@ -79,6 +79,7 @@ final class DriverManager
      *     sqlsrv
      *     ibm_db2 (unstable)
      *     drizzle_pdo_mysql
+     *     pdo_informix
      *
      * OR 'driverClass' that contains the full class name (with namespace) of the
      * driver class to instantiate.
