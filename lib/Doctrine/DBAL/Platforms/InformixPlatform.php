@@ -42,6 +42,10 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getBlobTypeDeclarationSQL(array $field)
     {
+       /*
+        The use of BLOB type in Informix is tricky and do not work properly
+        with the pdo_informix extension so the BYTE type is used instead.
+       */
         return 'BYTE';
     }
 
@@ -98,6 +102,10 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getClobTypeDeclarationSQL(array $field)
     {
+        /*
+         The use of CLOB type in Informix is tricky and do not work properly
+         with the pdo_informix extension so the TEXT type is used instead.
+        */
         return 'TEXT';
     }
 
@@ -537,6 +545,9 @@ class InformixPlatform extends AbstractPlatform
 
     /**
      * {@inheritDoc}
+     *
+     * The SQL sentence used is based on the next thread:
+     * {@link http://www.databaseteam.org/6-informix/8791d9fcbeab8020.htm}.
      */
     public function getListTableForeignKeysSQL($table)
     {
