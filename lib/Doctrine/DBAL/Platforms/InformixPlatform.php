@@ -40,6 +40,14 @@ class InformixPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getBinaryTypeDeclarationSQL(array $field)
+    {
+        return 'BYTE';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getBlobTypeDeclarationSQL(array $field)
     {
        /*
