@@ -220,7 +220,7 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
                 return DBALException::ERROR_ACCESS_DENIED;
         }
 
-        // In some cases the exception do not have the driver-specific error code
+        // In some cases the exception doesn't have the driver-specific error code
 
         if ( self::isErrorAccessDeniedMessage($exception->getMessage()) ) {
             return DBALException::ERROR_ACCESS_DENIED;
