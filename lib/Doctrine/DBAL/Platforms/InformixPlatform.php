@@ -100,7 +100,7 @@ class InformixPlatform extends AbstractPlatform
      */
     protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed)
     {
-        return $fixed 
+        return $fixed
             ? ($length ? 'CHAR(' . $length . ')' : 'CHAR(255)')
             : ($length ? 'VARCHAR(' . $length . ')' : 'VARCHAR(255)');
     }
@@ -137,7 +137,6 @@ class InformixPlatform extends AbstractPlatform
         return '';
     }
 
-    
     /**
      * {@inheritDoc}
      */
@@ -296,8 +295,8 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getIntegerTypeDeclarationSQL(array $columnDef)
     {
-        return empty($columnDef['autoincrement']) 
-            ? 'INTEGER' 
+        return empty($columnDef['autoincrement'])
+            ? 'INTEGER'
             : 'SERIAL';
     }
 
@@ -306,8 +305,8 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getBigIntTypeDeclarationSQL(array $columnDef)
     {
-        return empty($columnDef['autoincrement']) 
-            ? 'BIGINT' 
+        return empty($columnDef['autoincrement'])
+            ? 'BIGINT'
             : 'BIGSERIAL';
     }
 
@@ -441,9 +440,9 @@ class InformixPlatform extends AbstractPlatform
             . '    THEN (sc.collength / 256)::INT '
             . '    ELSE NULL '
             . 'END precision, '
-            . 'CASE ' 
+            . 'CASE '
             . '    WHEN (sc.coltype in (3, 4, 5, 8)) THEN '
-            . '        CASE ' 
+            . '        CASE '
             . '            WHEN (MOD(sc.collength, 256) = 255) THEN NULL '
             . '            ELSE MOD(sc.collength, 256)::INT '
             . '         END '
@@ -993,7 +992,7 @@ class InformixPlatform extends AbstractPlatform
             $table = $table->getQuotedName($this);
         }
 
-        $query = 'ALTER TABLE ' . $table . ' ADD CONSTRAINT ' 
+        $query = 'ALTER TABLE ' . $table . ' ADD CONSTRAINT '
                . $this->getForeignKeyDeclarationSQL($foreignKey);
 
         return $query;
@@ -1019,7 +1018,7 @@ class InformixPlatform extends AbstractPlatform
     * @param \Doctrine\DBAL\Schema\Constraint $constraint
     * @param string $sql
     *
-    * @return string 
+    * @return string
     */
     protected function repositionContraintNameSQL(Constraint $constraint, $sql) {
 
@@ -1027,7 +1026,7 @@ class InformixPlatform extends AbstractPlatform
 
             if ( preg_match("/\bADD\s+CONSTRAINT\b/i", $sql) ) {
 
-                $sql = preg_replace("/\bADD\s+CONSTRAINT\s+$constraintName\b/i", 
+                $sql = preg_replace("/\bADD\s+CONSTRAINT\s+$constraintName\b/i",
                                     ' ADD CONSTRAINT ', $sql);
             }
             else {
@@ -1042,5 +1041,4 @@ class InformixPlatform extends AbstractPlatform
         return $sql;
 
     }
-    
 }

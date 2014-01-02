@@ -41,4 +41,3 @@ class Connection extends PDOConnection
     }
 
 }
-

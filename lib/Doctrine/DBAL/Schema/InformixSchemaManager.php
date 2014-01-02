@@ -137,8 +137,8 @@ class InformixSchemaManager extends AbstractSchemaManager
                       'key_name'    => $v['idxname'],
                       'non_unique'  => $v['idxtype'] == 'D',
                       'primary'     => $v['constrtype'] == 'P',
-                  );     
-                
+                  );
+
               }
 
             }

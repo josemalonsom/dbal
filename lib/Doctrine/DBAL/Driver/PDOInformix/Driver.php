@@ -35,7 +35,6 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     /**
      * {@inheritdoc}
      *
-     * 
      * The params array must have the following keys/values:
      *
      * - 'dbname': The name of the database to connect to.
@@ -50,7 +49,7 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
      * <code>
      *
      *    use Doctrine\DBAL\Driver\PDOInformix\Driver;
-     *  
+     *
      *    $connectionParams = array(
      *        'dbname'       => 'test',
      *        'host'         => 'test-1',
@@ -58,14 +57,14 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
      *        'protocol'     => 'onsoctcp',
      *        'server'       => 'test1tcp',
      *    );
-     *    
+     *
      *    $driverOptions = array();
      *
      *    $username = 'user';
      *    $password = 'passwd';
-     *  
+     *
      *    $driver = new Driver();
-     *  
+     *
      *    $conn = $driver->connect($connectionParams, $username,
      *        $password, $driverOptions);
      *
@@ -74,7 +73,7 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
      * Note: The attribute PDO::ATTR_STRINGIFY_FETCHES is set to true by
      * default in the database handle so that the LOB types are fetched as
      * the real values instead of a resource. The value can be overwritten
-     * with other value in the driver options array. 
+     * with other value in the driver options array.
      *
      * @throws \Doctrine\DBAL\DBALException
      */
@@ -112,25 +111,25 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     {
 
         if ( empty($params['dbname']) ) {
-            throw DBALException::driverException($this, 
+            throw DBALException::driverException($this,
                 new \Exception("Missing 'dbname' in configuration for informix driver")
             );
         }
 
         if ( empty($params['host']) ) {
-            throw DBALException::driverException($this, 
+            throw DBALException::driverException($this,
                 new \Exception("Missing 'host' in configuration for informix driver")
             );
         }
 
         if ( empty($params['protocol']) ) {
-            throw DBALException::driverException($this, 
+            throw DBALException::driverException($this,
                 new \Exception("Missing 'protocol' in configuration for informix driver")
             );
         }
 
         if ( empty($params['server']) ) {
-            throw DBALException::driverException($this, 
+            throw DBALException::driverException($this,
                 new \Exception("Missing 'server' in configuration for informix driver")
             );
         }
@@ -231,11 +230,11 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
 
     /**
      * Checks if a message means an "access denied error".
-     * 
+     *
      * @param string
      * @return boolean
      */
-    protected static function isErrorAccessDeniedMessage($message) 
+    protected static function isErrorAccessDeniedMessage($message)
     {
         if ( strpos($message, 'Incorrect password or user') !== false ||
             strpos($message, 'Cannot connect to database server') !== false ||
