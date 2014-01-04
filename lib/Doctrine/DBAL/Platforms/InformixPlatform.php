@@ -691,14 +691,6 @@ class InformixPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function supportsReleaseSavepoints()
-    {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getCurrentDateSQL()
     {
         return 'TODAY';
