@@ -82,13 +82,14 @@ class InformixPlatform extends AbstractPlatform
             'integer'           => 'integer',
             'int'               => 'integer',
             'lvarchar'          => 'text',
+            'money'             => 'decimal',
             'nchar'             => 'string',
             'numeric'           => 'decimal',
             'nvarchar'          => 'string',
             'real'              => 'decimal',
             'serial8'           => 'bigint',
             'serial'            => 'integer',
-            'smallfloat'        => 'decimal',
+            'smallfloat'        => 'float',
             'smallint'          => 'smallint',
             'text'              => 'text',
             'varchar'           => 'string',
@@ -391,82 +392,92 @@ class InformixPlatform extends AbstractPlatform
 
     /**
      * {@inheritDoc}
+     *
+     * @link http://pic.dhe.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/ids_sqr_025.htm
+     * @link http://pic.dhe.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/ids_sqr_094.htm
      */
     public function getListTableColumnsSQL($table, $database = null)
     {
+
         return 'SELECT st.tabname, sc.colname, sc.colno, sc.coltype, '
+            . 'sc.collength, sd.type typedefault, sd.default, '
             . 'CASE '
-            . '    (CASE WHEN (sc.coltype BETWEEN 256 AND 309) '
-            . '          THEN (sc.coltype - 256) ELSE sc.coltype END) '
-            . 'WHEN 0    THEN "char" '
-            . 'WHEN 1    THEN "smallint" '
-            . 'WHEN 2    THEN "integer" '
-            . 'WHEN 3    THEN "float" '
-            . 'WHEN 4    THEN "smallfloat" '
-            . 'WHEN 5    THEN "decimal" '
-            . 'WHEN 6    THEN "serial" '
-            . 'WHEN 7    THEN "date" '
-            . 'WHEN 8    THEN "money" '
-            . 'WHEN 9    THEN "null" '
-            . 'WHEN 10   THEN "datetime" '
-            . 'WHEN 11   THEN "byte" '
-            . 'WHEN 12   THEN "text" '
-            . 'WHEN 13   THEN "varchar" '
-            . 'WHEN 14   THEN "interval" '
-            . 'WHEN 15   THEN "nchar" '
-            . 'WHEN 16   THEN "nvarchar" '
-            . 'WHEN 17   THEN "int8" '
-            . 'WHEN 18   THEN "serial8" '
-            . 'WHEN 19   THEN "set" '
-            . 'WHEN 20   THEN "multiset" '
-            . 'WHEN 21   THEN "list" '
-            . 'WHEN 22   THEN "row" '
-            . 'WHEN 23   THEN "collection" '
-            . 'WHEN 43   THEN "lvarchar" '
-            . 'WHEN 45   THEN "boolean" '
-            . 'WHEN 52   THEN "bigint" '
-            . 'WHEN 53   THEN "bigserial" '
-            . 'ELSE '
-            . '    CASE '
-            . '        WHEN (sc.extended_id > 0) THEN '
-            . '        (SELECT UPPER(name) FROM sysxtdtypes '
-            . '         WHERE extended_id = sc.extended_id) '
+            . '    WHEN sc.coltype IN (0,256)  THEN "char" '
+            . '    WHEN sc.coltype IN (1,257)  THEN "smallint" '
+            . '    WHEN sc.coltype IN (2,258)  THEN "integer" '
+            . '    WHEN sc.coltype IN (3,259)  THEN "float" '
+            . '    WHEN sc.coltype IN (4,260)  THEN "smallfloat" '
+            . '    WHEN sc.coltype IN (5,261)  THEN "decimal" '
+            . '    WHEN sc.coltype IN (6,262)  THEN "serial" '
+            . '    WHEN sc.coltype IN (7,263)  THEN "date" '
+            . '    WHEN sc.coltype IN (8,264)  THEN "money" '
+            . '    WHEN sc.coltype IN (9,265)  THEN "null" '
+            . '    WHEN sc.coltype IN (10,266) THEN "datetime" '
+            . '    WHEN sc.coltype IN (11,267) THEN "byte" '
+            . '    WHEN sc.coltype IN (12,268) THEN "text" '
+            . '    WHEN sc.coltype IN (13,269) THEN "varchar" '
+            . '    WHEN sc.coltype IN (14,270) THEN "interval" '
+            . '    WHEN sc.coltype IN (15,271) THEN "nchar" '
+            . '    WHEN sc.coltype IN (16,272) THEN "nvarchar" '
+            . '    WHEN sc.coltype IN (17,273) THEN "int8" '
+            . '    WHEN sc.coltype IN (18,274) THEN "serial8" '
+            . '    WHEN sc.coltype IN (19,275) THEN "set" '
+            . '    WHEN sc.coltype IN (20,276) THEN "multiset" '
+            . '    WHEN sc.coltype IN (21,277) THEN "list" '
+            . '    WHEN sc.coltype IN (22,278) THEN "row" '
+            . '    WHEN sc.coltype IN (23,279) THEN "collection" '
+            . '    WHEN sc.coltype IN (43,299) THEN "lvarchar" '
+            . '    WHEN sc.coltype IN (45,301) THEN "boolean" '
+            . '    WHEN sc.coltype IN (52,308) THEN "bigint" '
+            . '    WHEN sc.coltype IN (53,309) THEN "bigserial" '
             . '    ELSE '
-            . '        "unknown" '
-            . '    END '
+            . '        CASE '
+            . '            WHEN (sc.extended_id > 0) THEN '
+            . '                (SELECT LOWER(name) FROM sysxtdtypes WHERE '
+            . '                    extended_id = sc.extended_id) '
+            . '            ELSE "unknown"'
+            . '        END '
             . 'END typename, '
             . 'CASE '
-            . '    WHEN (sc.coltype in (3, 4, 5, 8) and (sc.collength / 256) >= 1) '
-            . '    THEN (sc.collength / 256)::INT '
-            . '    ELSE NULL '
+            . '    WHEN (sc.coltype IN (13,269,16,272)) THEN /* varchar and nvarchar */ '
+            . '        CASE '
+            . '            WHEN (sc.collength > 0) THEN MOD(sc.collength,256)::INT '
+            . '            ELSE MOD(sc.collength+65536,256)::INT '
+            . '        END '
+            . '    ELSE '
+            . '        NULL '
+            . 'END maxlength, '
+            . 'CASE '
+            . '    WHEN (sc.coltype IN (13,269,16,272)) THEN /* varchar and nvarchar */ '
+            . '        CASE '
+            . '            WHEN (sc.collength > 0) THEN (sc.collength/256)::INT '
+            . '            ELSE ((65536+sc.collength)/256)::INT '
+            . '        END '
+            . '    ELSE '
+            . '        NULL '
+            . 'END minlength, '
+            . 'CASE '
+            . '    WHEN (sc.coltype IN (5,261,8,264) AND (sc.collength / 256) >= 1) '
+            . '        THEN (sc.collength / 256)::INT /* decimal and money */ '
+            . '    ELSE '
+            . '        NULL '
             . 'END precision, '
             . 'CASE '
-            . '    WHEN (sc.coltype in (3, 4, 5, 8)) THEN '
-            . '        CASE '
-            . '            WHEN (MOD(sc.collength, 256) = 255) THEN NULL '
-            . '            ELSE MOD(sc.collength, 256)::INT '
-            . '         END '
+            . '    WHEN (sc.coltype IN (5,261,8,264) AND (MOD(sc.collength, 256) <> 255)) '
+            . '        THEN MOD(sc.collength, 256)::INT /* decimal and money */ '
             . '    ELSE '
             . '        NULL '
             . 'END scale, '
-            . 'CASE '
+            . 'CASE  '
             . '    WHEN (sc.coltype < 256) THEN "Y" '
             . '    WHEN (sc.coltype BETWEEN 256 AND 309) THEN "N" '
-            . 'ELSE NULL '
-            . 'END nulls, '
-            . 'CASE sd.type '
-            . '    WHEN "C" THEN "CURRENT" '
-            . '    WHEN "T" THEN "TODAY" '
-            . '    WHEN "N" THEN "NULL" '
-            . 'ELSE sd.default '
-            . 'END default '
-            . 'FROM '
-            . 'systables st '
+            . '    ELSE '
+            . '        NULL '
+            . 'END nulls '
+            . 'FROM systables st '
             . 'LEFT OUTER JOIN syscolumns sc ON st.tabid = sc.tabid '
             . 'LEFT OUTER JOIN sysdefaults sd ON (sc.tabid = sd.tabid AND sc.colno = sd.colno) '
-            . 'WHERE '
-            . 'UPPER(st.tabname) = UPPER("' . $table . '") ';
-
+            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '")';
     }
 
     /**

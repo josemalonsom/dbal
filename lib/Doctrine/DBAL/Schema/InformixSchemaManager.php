@@ -48,57 +48,111 @@ class InformixSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableColumnDefinition($tableColumn)
     {
+        $autoincrement   = false;
+        $fixed           = false;
+        $unsigned        = false;
+        $length          = null;
+        $scale           = null;
+        $precision       = null;
+        $platformOptions = array();
+
         $tableColumn = array_change_key_case($tableColumn, \CASE_LOWER);
 
-        $fixed = null;
-        $unsigned = false;
-        $scale = false;
-        $precision = false;
+        switch ( strtolower($tableColumn['typename']) ) {
+
+            case 'char':
+            case 'nchar':
+                $fixed  = true;
+                $length = $tableColumn['collength'];
+            break;
+
+            case 'lvarchar':
+                $length = $tableColumn['collength'];
+            break;
+
+            case 'varchar':
+            case 'nvarchar':
+                $length = $tableColumn['maxlength'];
+                $platformOptions = array(
+                                       'maxlength' => $tableColumn['maxlength'],
+                                       'minlength' => $tableColumn['minlength']
+                                   );
+            break;
+
+            case 'decimal':
+            case 'money':
+                $scale     = $tableColumn['scale'];
+                $precision = $tableColumn['precision'];
+            break;
+
+            case 'bigserial':
+            case 'serial8':
+            case 'serial':
+                $autoincrement = true;
+            break;
+
+        }
+
+        $default = $this->_getColumnDefinitionDefault($tableColumn['typename'],
+            $tableColumn['typedefault'], $tableColumn['default']);
+
+        $options = array(
+            'autoincrement'   => $autoincrement,
+            'default'         => $default,
+            'fixed'           => $fixed,
+            'length'          => $length,
+            'notnull'         => ($tableColumn['nulls'] == 'N'),
+            'platformOptions' => $platformOptions,
+            'precision'       => $precision,
+            'scale'           => $scale,
+            'unsigned'        => $unsigned,
+        );
 
         $type = $this->_platform->getDoctrineTypeMapping($tableColumn['typename']);
 
-        switch ( strtolower($tableColumn['typename']) ) {
-            case 'byte':
-            case 'character varying':
-            case 'nvarchar':
-            case 'varchar':
-                $fixed = false;
-                break;
-            case 'char':
-            case 'character':
-            case 'nchar':
-                $fixed = true;
-                break;
-            case 'dec':
-            case 'decimal':
-            case 'double':
-            case 'double precision':
-            case 'float':
-            case 'numeric':
-            case 'real':
-            case 'smallfloat':
-                $scale = $tableColumn['scale'];
-                $precision = $tableColumn['precision'];
-                break;
-        }
-
-        $options = array(
-            'length'        => $tableColumn['default'] ? : null,
-            'unsigned'      => (bool)$unsigned,
-            'fixed'         => (bool)$fixed,
-            'default'       => ($tableColumn['default'] == 'NULL') ? null : $tableColumn['default'],
-            'notnull'       => (bool) ($tableColumn['nulls'] == 'N'),
-            'scale'         => null,
-            'precision'     => null,
-            'platformOptions' => array(),
-        );
-
-        if ( $scale !== null && $precision !== null ) {
-            $options['scale'] = $scale;
-            $options['precision'] = $precision;
-        }
-
         return new Column($tableColumn['colname'], \Doctrine\DBAL\Types\Type::getType($type), $options);
+    }
+
+    /**
+     * Returns the default value of a column.
+     *
+     * @param string data type name
+     * @param string type of default value
+     * @param string default value
+     * @return null|string
+     * @link http://pic.dhe.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/ids_sqr_030.htm
+     */
+    protected function _getColumnDefinitionDefault($typeName, $typeDefault, $defaultValue)
+    {
+
+        switch ( $typeDefault ) {
+
+            case 'C':
+                $default = 'CURRENT';
+            break;
+
+            case 'L':
+                if ( preg_match('/char/i', $typeName) ) {
+                    $default = trim($defaultValue);
+                }
+                elseif ( 'boolean' == $typeName ) {
+                     $default = (strtoupper(substr($defaultValue, 0, 1)) == 'T');
+                }
+                else {
+                    $default = trim(preg_replace('/^.*?\s/', '', $defaultValue, 1));
+                }
+            break;
+
+            case 'T':
+                $default = 'TODAY';
+            break;
+
+            default:
+                $default = null;
+        }
+
+        return $default;
+
     }
 
     /**
