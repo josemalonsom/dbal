@@ -188,7 +188,7 @@ class InformixSchemaManager extends AbstractSchemaManager
 
                   $indexesByColumns[] = array(
                       'column_name' => $v["col$i"],
-                      'key_name'    => $v['idxname'],
+                      'key_name'    => $v['constrname'] ? : $v['idxname'],
                       'non_unique'  => $v['idxtype'] == 'D',
                       'primary'     => $v['constrtype'] == 'P',
                   );
@@ -254,17 +254,40 @@ class InformixSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    protected function _getPortableViewDefinition($view)
+    protected function _getPortableViewsList($views)
     {
-        $view = array_change_key_case($view, \CASE_LOWER);
+        $viewsParts = array();
 
-        if ( ! is_resource($view['text']) ) {
-            $pos = strpos($view['text'], ' AS ');
-            $sql = substr($view['text'], $pos+4);
-        } else {
-            $sql = '';
+        foreach ( $views as $value ) {
+
+            $value = array_change_key_case($value, \CASE_LOWER);
+
+            $viewName = $value['viewname'];
+
+            if ( ! isset($viewsParts[$viewName]) ) {
+                $viewsParts[$viewName] = array();
+            }
+
+            $viewsParts[$viewName][$value['seqno']] = $value['viewtext'];
+
         }
 
-        return new View($view['name'], $sql);
+        $list = array();
+
+        foreach ( $viewsParts as $viewName => $viewSql ) {
+
+            ksort($viewSql, \SORT_NUMERIC);
+            $viewSql = implode('', $viewSql);
+
+            $view = new View($viewName, $viewSql);
+
+            $viewName = strtolower($view->getQuotedName($this->_platform));
+
+            $list[$viewName] = $view;
+
+        }
+
+        return $list;
     }
+
 }

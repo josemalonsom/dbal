@@ -501,19 +501,25 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getListViewsSQL($database)
     {
-        return 'SELECT systables.tabname, sysviews.viewtext '
-            . 'FROM systables, sysviews WHERE systables.tabtype = "V" '
-            . 'AND systables.tabid = sysviews.tabid';
+        return 'SELECT '
+            . 'systables.tabname viewname, sysviews.seqno, sysviews.viewtext '
+            . 'FROM systables, sysviews '
+            . 'WHERE systables.tabtype = "V" '
+            . 'AND systables.tabid = sysviews.tabid '
+            . 'ORDER BY systables.tabname ASC, sysviews.seqno ASC';
 
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @link http://pic.dhe.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/ids_sqr_041.htm
+     * @link http://pic.dhe.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/ids_sqr_029.htm
      */
     public function getListTableIndexesSQL($table, $currentDatabase = null)
     {
 
-        return 'SELECT si.idxname, si.idxtype, ctr.constrtype, '
+        return 'SELECT si.idxname, si.idxtype, ctr.constrname, ctr.constrtype, '
             . 'sc1.colname  col1,  sc2.colname  col2,  sc3.colname  col3,  '
             . 'sc4.colname  col4,  sc5.colname  col5,  sc6.colname  col6,  '
             . 'sc7.colname  col7,  sc8.colname  col8,  sc9.colname  col9,  '
@@ -523,40 +529,40 @@ class InformixPlatform extends AbstractPlatform
             . 'FROM  systables st '
             . 'INNER JOIN sysindexes si '
             . '    ON si.tabid = st.tabid  '
+            . 'LEFT OUTER JOIN syscolumns sc1 '
+            . '    ON (ABS(si.part1)= sc1.colno AND si.tabid = sc1.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc2 '
+            . '    ON (ABS(si.part2)= sc2.colno AND si.tabid = sc2.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc3 '
+            . '    ON (ABS(si.part3)= sc3.colno AND si.tabid = sc3.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc4 '
+            . '    ON (ABS(si.part4)= sc4.colno AND si.tabid = sc4.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc5 '
+            . '    ON (ABS(si.part5)= sc5.colno AND si.tabid = sc5.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc6 '
+            . '    ON (ABS(si.part6)= sc6.colno AND si.tabid = sc6.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc7 '
+            . '    ON (ABS(si.part7)= sc7.colno AND si.tabid = sc7.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc8 '
+            . '    ON (ABS(si.part8)= sc8.colno AND si.tabid = sc8.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc9 '
+            . '    ON (ABS(si.part9)= sc9.colno AND si.tabid = sc9.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc10 '
+            . '    ON (ABS(si.part10)= sc10.colno AND si.tabid = sc10.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc11 '
+            . '    ON (ABS(si.part11)= sc11.colno AND si.tabid = sc11.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc12 '
+            . '    ON (ABS(si.part12)= sc12.colno AND si.tabid = sc12.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc13 '
+            . '    ON (ABS(si.part13)= sc13.colno AND si.tabid = sc13.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc14 '
+            . '    ON (ABS(si.part14)= sc14.colno AND si.tabid = sc14.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc15 '
+            . '    ON (ABS(si.part15)= sc15.colno AND si.tabid = sc15.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc16 '
+            . '    ON (ABS(si.part16)= sc16.colno AND si.tabid = sc16.tabid) '
             . 'LEFT OUTER JOIN sysconstraints ctr '
             . '    ON (ctr.tabid = st.tabid and ctr.idxname = si.idxname) '
-            . 'LEFT OUTER JOIN syscolumns sc1 '
-            . '    ON (si.part1 = sc1.colno AND si.tabid = sc1.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc2 '
-            . '    ON (si.part2 = sc2.colno AND si.tabid = sc2.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc3 '
-            . '    ON (si.part3 = sc3.colno AND si.tabid = sc3.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc4 '
-            . '    ON (si.part4 = sc4.colno AND si.tabid = sc4.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc5 '
-            . '    ON (si.part5 = sc5.colno AND si.tabid = sc5.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc6 '
-            . '    ON (si.part6 = sc6.colno AND si.tabid = sc6.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc7 '
-            . '    ON (si.part7 = sc7.colno AND si.tabid = sc7.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc8 '
-            . '    ON (si.part8 = sc8.colno AND si.tabid = sc8.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc9 '
-            . '    ON (si.part9 = sc9.colno AND si.tabid = sc9.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc10 '
-            . '    ON (si.part10 = sc10.colno AND si.tabid = sc10.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc11 '
-            . '    ON (si.part11 = sc11.colno AND si.tabid = sc11.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc12 '
-            . '    ON (si.part12 = sc12.colno AND si.tabid = sc12.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc13 '
-            . '    ON (si.part13 = sc13.colno AND si.tabid = sc13.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc14 '
-            . '    ON (si.part14 = sc14.colno AND si.tabid = sc14.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc15 '
-            . '    ON (si.part15 = sc15.colno AND si.tabid = sc15.tabid) '
-            . 'LEFT OUTER JOIN syscolumns sc16 '
-            . '    ON (si.part16 = sc16.colno AND si.tabid = sc16.tabid) '
             . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '") ';
 
     }
@@ -598,69 +604,69 @@ class InformixPlatform extends AbstractPlatform
             . 'INNER JOIN sysindexes refsi '
             . '    ON refsc.idxname = refsi.idxname '
             . 'LEFT OUTER JOIN syscolumns sc1 '
-            . '    ON (si.part1 = sc1.colno AND si.tabid = sc1.tabid) '
+            . '    ON (ABS(si.part1)= sc1.colno AND si.tabid = sc1.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc2 '
-            . '    ON (si.part2 = sc2.colno AND si.tabid = sc2.tabid) '
+            . '    ON (ABS(si.part2)= sc2.colno AND si.tabid = sc2.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc3 '
-            . '    ON (si.part3 = sc3.colno AND si.tabid = sc3.tabid) '
+            . '    ON (ABS(si.part3)= sc3.colno AND si.tabid = sc3.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc4 '
-            . '    ON (si.part4 = sc4.colno AND si.tabid = sc4.tabid) '
+            . '    ON (ABS(si.part4)= sc4.colno AND si.tabid = sc4.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc5 '
-            . '    ON (si.part5 = sc5.colno AND si.tabid = sc5.tabid) '
+            . '    ON (ABS(si.part5)= sc5.colno AND si.tabid = sc5.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc6 '
-            . '    ON (si.part6 = sc6.colno AND si.tabid = sc6.tabid) '
+            . '    ON (ABS(si.part6)= sc6.colno AND si.tabid = sc6.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc7 '
-            . '    ON (si.part7 = sc7.colno AND si.tabid = sc7.tabid) '
+            . '    ON (ABS(si.part7)= sc7.colno AND si.tabid = sc7.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc8 '
-            . '    ON (si.part8 = sc8.colno AND si.tabid = sc8.tabid) '
+            . '    ON (ABS(si.part8)= sc8.colno AND si.tabid = sc8.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc9 '
-            . '    ON (si.part9 = sc9.colno AND si.tabid = sc9.tabid) '
+            . '    ON (ABS(si.part9)= sc9.colno AND si.tabid = sc9.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc10 '
-            . '    ON (si.part10 = sc10.colno AND si.tabid = sc10.tabid) '
+            . '    ON (ABS(si.part10)= sc10.colno AND si.tabid = sc10.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc11 '
-            . '    ON (si.part11 = sc11.colno AND si.tabid = sc11.tabid) '
+            . '    ON (ABS(si.part11)= sc11.colno AND si.tabid = sc11.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc12 '
-            . '    ON (si.part12 = sc12.colno AND si.tabid = sc12.tabid) '
+            . '    ON (ABS(si.part12)= sc12.colno AND si.tabid = sc12.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc13 '
-            . '    ON (si.part13 = sc13.colno AND si.tabid = sc13.tabid) '
+            . '    ON (ABS(si.part13)= sc13.colno AND si.tabid = sc13.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc14 '
-            . '    ON (si.part14 = sc14.colno AND si.tabid = sc14.tabid) '
+            . '    ON (ABS(si.part14)= sc14.colno AND si.tabid = sc14.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc15 '
-            . '    ON (si.part15 = sc15.colno AND si.tabid = sc15.tabid) '
+            . '    ON (ABS(si.part15)= sc15.colno AND si.tabid = sc15.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc16 '
-            . '    ON (si.part16 = sc16.colno AND si.tabid = sc16.tabid) '
+            . '    ON (ABS(si.part16)= sc16.colno AND si.tabid = sc16.tabid) '
             . 'LEFT OUTER JOIN syscolumns pksc1 '
-            . '    ON (refsi.part1 = pksc1.colno AND refsi.tabid = pksc1.tabid)'
+            . '    ON (ABS(refsi.part1)= pksc1.colno AND refsi.tabid = pksc1.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc2 '
-            . '    ON (refsi.part2 = pksc2.colno AND refsi.tabid = pksc2.tabid)'
+            . '    ON (ABS(refsi.part2)= pksc2.colno AND refsi.tabid = pksc2.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc3 '
-            . '    ON (refsi.part3 = pksc3.colno AND refsi.tabid = pksc3.tabid)'
+            . '    ON (ABS(refsi.part3)= pksc3.colno AND refsi.tabid = pksc3.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc4 '
-            . '    ON (refsi.part4 = pksc4.colno AND refsi.tabid = pksc4.tabid)'
+            . '    ON (ABS(refsi.part4)= pksc4.colno AND refsi.tabid = pksc4.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc5 '
-            . '    ON (refsi.part5 = pksc5.colno AND refsi.tabid = pksc5.tabid)'
+            . '    ON (ABS(refsi.part5)= pksc5.colno AND refsi.tabid = pksc5.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc6 '
-            . '    ON (refsi.part6 = pksc6.colno AND refsi.tabid = pksc6.tabid)'
+            . '    ON (ABS(refsi.part6)= pksc6.colno AND refsi.tabid = pksc6.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc7 '
-            . '    ON (refsi.part7 = pksc7.colno AND refsi.tabid = pksc7.tabid)'
+            . '    ON (ABS(refsi.part7)= pksc7.colno AND refsi.tabid = pksc7.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc8 '
-            . '    ON (refsi.part8 = pksc8.colno AND refsi.tabid = pksc8.tabid)'
+            . '    ON (ABS(refsi.part8)= pksc8.colno AND refsi.tabid = pksc8.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc9 '
-            . '    ON (refsi.part9 = pksc9.colno AND refsi.tabid = pksc9.tabid)'
+            . '    ON (ABS(refsi.part9)= pksc9.colno AND refsi.tabid = pksc9.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc10 '
-            . '    ON (refsi.part10 = pksc10.colno AND refsi.tabid = pksc10.tabid)'
+            . '    ON (ABS(refsi.part10)= pksc10.colno AND refsi.tabid = pksc10.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc11 '
-            . '    ON (refsi.part11 = pksc11.colno AND refsi.tabid = pksc11.tabid)'
+            . '    ON (ABS(refsi.part11)= pksc11.colno AND refsi.tabid = pksc11.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc12 '
-            . '    ON (refsi.part12 = pksc12.colno AND refsi.tabid = pksc12.tabid)'
+            . '    ON (ABS(refsi.part12)= pksc12.colno AND refsi.tabid = pksc12.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc13 '
-            . '    ON (refsi.part13 = pksc13.colno AND refsi.tabid = pksc13.tabid)'
+            . '    ON (ABS(refsi.part13)= pksc13.colno AND refsi.tabid = pksc13.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc14 '
-            . '    ON (refsi.part14 = pksc14.colno AND refsi.tabid = pksc14.tabid)'
+            . '    ON (ABS(refsi.part14)= pksc14.colno AND refsi.tabid = pksc14.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc15 '
-            . '    ON (refsi.part15 = pksc15.colno AND refsi.tabid = pksc15.tabid)'
+            . '    ON (ABS(refsi.part15)= pksc15.colno AND refsi.tabid = pksc15.tabid)'
             . 'LEFT OUTER JOIN syscolumns pksc16 '
-            . '    ON (refsi.part16 = pksc16.colno AND refsi.tabid = pksc16.tabid)'
+            . '    ON (ABS(refsi.part16)= pksc16.colno AND refsi.tabid = pksc16.tabid)'
             . 'WHERE '
             . 'UPPER(st.tabname) = UPPER("' . $table . '") '
             . 'AND sc.constrtype = "R" ';
@@ -746,6 +752,25 @@ class InformixPlatform extends AbstractPlatform
 
         $sqls = parent::_getCreateTableSQL($tableName, $columns, $options);
 
+        // Informix already creates a index on each foreign key constraint
+        if ( isset($options['foreignKeys']) ) {
+
+            foreach ( $options['foreignKeys'] as $foreignKey) {
+
+                foreach ( $indexes as $key => $definition ) {
+
+                    if ( array_diff($definition->getColumns(), $foreignKey->getColumns()) ) {
+                        continue;
+                    }
+
+                    unset($indexes[$key]);
+
+                }
+
+            }
+
+        }
+
         foreach ( $indexes as $definition ) {
             $sqls[] = $this->getCreateIndexSQL($definition, $tableName);
         }
@@ -799,7 +824,7 @@ class InformixPlatform extends AbstractPlatform
                 continue;
             }
 
-            $queryParts[] =  'RENAME COLUMN' . $oldColumnName . ' TO ' . $column->getQuotedName($this);
+            $sql[] =  'RENAME COLUMN ' . $diff->name . '.' . $oldColumnName . ' TO ' . $column->getQuotedName($this);
         }
 
         $tableSql = array();
@@ -807,13 +832,13 @@ class InformixPlatform extends AbstractPlatform
         if ( ! $this->onSchemaAlterTable($diff, $tableSql) ) {
 
             if ( count($queryParts) > 0 ) {
-                $sql[] = 'ALTER TABLE ' . $diff->name . ' ' . implode(" ", $queryParts);
+                $sql[] = 'ALTER TABLE ' . $diff->name . ' ' . implode(", ", $queryParts);
             }
 
             $sql = array_merge($sql, $this->_getAlterTableIndexForeignKeySQL($diff));
 
             if ( $diff->newName !== false ) {
-                $sql[] =  'RENAME TABLE TO ' . $diff->newName;
+                $sql[] =  'RENAME TABLE ' . $diff->name . ' TO ' . $diff->newName;
             }
         }
 
