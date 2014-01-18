@@ -218,6 +218,13 @@ class InformixSchemaManagerTest extends SchemaManagerFunctionalTestCase
       );
 
       $data[][] = array(
+          'doctrine_type' => 'time',
+          'default'       => 'CURRENT',
+          'sql_snippet'   => 'DATETIME HOUR TO SECOND DEFAULT CURRENT HOUR TO SECOND',
+          'test_name'     => 'time',
+      );
+
+      $data[][] = array(
           'doctrine_type'   => 'string',
           'fixed'           => false,
           'length'          => 240,

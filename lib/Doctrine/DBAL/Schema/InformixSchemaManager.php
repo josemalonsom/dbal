@@ -91,6 +91,12 @@ class InformixSchemaManager extends AbstractSchemaManager
                 $autoincrement = true;
             break;
 
+            case 'datetime':
+                if ( $tableColumn['collength'] == 1642 ) {
+                    $tableColumn['typename'] = 'time';
+                }
+            break;
+
         }
 
         $default = $this->_getColumnDefinitionDefault($tableColumn['typename'],
