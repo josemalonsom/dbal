@@ -518,17 +518,22 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getListTableIndexesSQL($table, $currentDatabase = null)
     {
-
-        return 'SELECT si.idxname, si.idxtype, ctr.constrname, ctr.constrtype, '
-            . 'sc1.colname  col1,  sc2.colname  col2,  sc3.colname  col3,  '
-            . 'sc4.colname  col4,  sc5.colname  col5,  sc6.colname  col6,  '
-            . 'sc7.colname  col7,  sc8.colname  col8,  sc9.colname  col9,  '
+        /*
+         * We list first the indexes created by the user excluding the
+         * internal indexes created automaticly by Informix, then we
+         * list the constraints that have indexes.
+         */
+        return 'SELECT st.tabname, si.idxname, si.idxtype, '
+            . 'NULL::VARCHAR(128) constrname, NULL::CHAR(1) constrtype, '
+            . 'sc1.colname  col1,  sc2.colname  col2,  sc3.colname  col3, '
+            . 'sc4.colname  col4,  sc5.colname  col5,  sc6.colname  col6, '
+            . 'sc7.colname  col7,  sc8.colname  col8,  sc9.colname  col9, '
             . 'sc10.colname col10, sc11.colname col11, sc12.colname col12, '
             . 'sc13.colname col13, sc14.colname col14, sc15.colname col15, '
             . 'sc16.colname col16 '
             . 'FROM  systables st '
             . 'INNER JOIN sysindexes si '
-            . '    ON si.tabid = st.tabid  '
+            . '    ON si.tabid = st.tabid '
             . 'LEFT OUTER JOIN syscolumns sc1 '
             . '    ON (ABS(si.part1)= sc1.colno AND si.tabid = sc1.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc2 '
@@ -561,10 +566,56 @@ class InformixPlatform extends AbstractPlatform
             . '    ON (ABS(si.part15)= sc15.colno AND si.tabid = sc15.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc16 '
             . '    ON (ABS(si.part16)= sc16.colno AND si.tabid = sc16.tabid) '
-            . 'LEFT OUTER JOIN sysconstraints ctr '
-            . '    ON (ctr.tabid = st.tabid and ctr.idxname = si.idxname) '
-            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '") ';
-
+            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '") '
+            . 'AND si.idxname NOT LIKE " " || si.tabid || "_%" '
+            . 'UNION '
+            . 'SELECT st.tabname, si.idxname, si.idxtype, '
+            . 'ctr.constrname, ctr.constrtype, '
+            . 'sc1.colname  col1,  sc2.colname  col2,  sc3.colname  col3, '
+            . 'sc4.colname  col4,  sc5.colname  col5,  sc6.colname  col6, '
+            . 'sc7.colname  col7,  sc8.colname  col8,  sc9.colname  col9, '
+            . 'sc10.colname col10, sc11.colname col11, sc12.colname col12, '
+            . 'sc13.colname col13, sc14.colname col14, sc15.colname col15, '
+            . 'sc16.colname col16 '
+            . 'FROM  systables st '
+            . 'INNER JOIN sysconstraints ctr '
+            . '    ON (ctr.tabid = st.tabid) '
+            . 'LEFT OUTER JOIN sysindexes si '
+            . '    ON (si.tabid = ctr.tabid AND si.idxname = ctr.idxname) '
+            . 'LEFT OUTER JOIN syscolumns sc1 '
+            . '    ON (ABS(si.part1)= sc1.colno AND si.tabid = sc1.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc2 '
+            . '    ON (ABS(si.part2)= sc2.colno AND si.tabid = sc2.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc3 '
+            . '    ON (ABS(si.part3)= sc3.colno AND si.tabid = sc3.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc4 '
+            . '    ON (ABS(si.part4)= sc4.colno AND si.tabid = sc4.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc5 '
+            . '    ON (ABS(si.part5)= sc5.colno AND si.tabid = sc5.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc6 '
+            . '    ON (ABS(si.part6)= sc6.colno AND si.tabid = sc6.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc7 '
+            . '    ON (ABS(si.part7)= sc7.colno AND si.tabid = sc7.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc8 '
+            . '    ON (ABS(si.part8)= sc8.colno AND si.tabid = sc8.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc9 '
+            . '    ON (ABS(si.part9)= sc9.colno AND si.tabid = sc9.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc10 '
+            . '    ON (ABS(si.part10)= sc10.colno AND si.tabid = sc10.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc11 '
+            . '    ON (ABS(si.part11)= sc11.colno AND si.tabid = sc11.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc12 '
+            . '    ON (ABS(si.part12)= sc12.colno AND si.tabid = sc12.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc13 '
+            . '    ON (ABS(si.part13)= sc13.colno AND si.tabid = sc13.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc14 '
+            . '    ON (ABS(si.part14)= sc14.colno AND si.tabid = sc14.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc15 '
+            . '    ON (ABS(si.part15)= sc15.colno AND si.tabid = sc15.tabid) '
+            . 'LEFT OUTER JOIN syscolumns sc16 '
+            . '    ON (ABS(si.part16)= sc16.colno AND si.tabid = sc16.tabid) '
+            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '") '
+            . 'AND ctr.idxname IS NOT NULL ';
     }
 
     /**
@@ -742,37 +793,34 @@ class InformixPlatform extends AbstractPlatform
      */
     protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
     {
-        $indexes = array();
+        /*
+         * Informix creates an automatic index in ascending order for the
+         * unique, primary-key and referencial constraints. If you try to 
+         * create an specific index in the same column or columns that fits
+         * with the automatic index the database server returns an error. When
+         * the index exists before the creation of the constraint, if is
+         * possible, it's shared and no error is return, so it's important
+         * that the indexes are created before the foreign key constraints.
+         */
 
-        if ( isset($options['indexes']) ) {
-            $indexes = $options['indexes'];
-        }
+        $indexes = isset($options['indexes']) ? $options['indexes']
+            : array();
 
         $options['indexes'] = array();
 
+        $foreignKeys = isset($options['foreignKeys']) ? $options['foreignKeys']
+            : array();
+
+        $options['foreignKeys'] = array();
+
         $sqls = parent::_getCreateTableSQL($tableName, $columns, $options);
-
-        // Informix already creates a index on each foreign key constraint
-        if ( isset($options['foreignKeys']) ) {
-
-            foreach ( $options['foreignKeys'] as $foreignKey) {
-
-                foreach ( $indexes as $key => $definition ) {
-
-                    if ( array_diff($definition->getColumns(), $foreignKey->getColumns()) ) {
-                        continue;
-                    }
-
-                    unset($indexes[$key]);
-
-                }
-
-            }
-
-        }
 
         foreach ( $indexes as $definition ) {
             $sqls[] = $this->getCreateIndexSQL($definition, $tableName);
+        }
+
+        foreach ( $foreignKeys as $definition ) {
+            $sqls[] = $this->getCreateForeignKeySQL($definition, $tableName);
         }
 
         return $sqls;
@@ -814,8 +862,8 @@ class InformixPlatform extends AbstractPlatform
 
             /* @var $columnDiff \Doctrine\DBAL\Schema\ColumnDiff */
             $column = $columnDiff->column;
-            $queryParts[] =  'ALTER ' . ($columnDiff->oldColumnName) . ' '
-                    . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
+            $queryParts[] =  'MODIFY '
+                . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
         }
 
         foreach ( $diff->renamedColumns as $oldColumnName => $column ) {
@@ -843,6 +891,35 @@ class InformixPlatform extends AbstractPlatform
         }
 
         return array_merge($sql, $tableSql, $columnSql);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getPostAlterTableIndexForeignKeySQL(TableDiff $diff)
+    {
+      $tableName = (false !== $diff->newName)
+          ? $diff->getNewName()->getQuotedName($this)
+          : $diff->getName()->getQuotedName($this);
+
+      $sql = array();
+
+      foreach ( $diff->addedIndexes as $index ) {
+          $sql[] = $this->getCreateIndexSQL($index, $tableName);
+      }
+
+      $diff->addedIndexes = array();
+
+      foreach ( $diff->changedIndexes as $index ) {
+          $sql[] = $this->getCreateIndexSQL($index, $tableName);
+      }
+
+      $diff->changedIndexes = array();
+
+      $sql = array_merge($sql, parent::getPostAlterTableIndexForeignKeySQL($diff));
+
+      return $sql;
+
     }
 
     /**
@@ -997,6 +1074,21 @@ class InformixPlatform extends AbstractPlatform
 
         return $this->repositionContraintNameSQL($constraint, $constraintSql);
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getCreatePrimaryKeySQL(Index $index, $table)
+    {
+        $sql = 'ALTER TABLE ' . $table . ' ADD CONSTRAINT PRIMARY KEY ('
+            . $this->getIndexFieldDeclarationListSQL($index->getQuotedColumns($this)) . ')';
+
+        if ($index->getName()) {
+            $sql .= ' CONSTRAINT ' . $index->getQuotedName($this);
+        }
+
+        return $sql;
     }
 
     /**
