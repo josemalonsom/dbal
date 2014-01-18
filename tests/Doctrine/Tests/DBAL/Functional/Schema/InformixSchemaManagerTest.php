@@ -258,4 +258,53 @@ class InformixSchemaManagerTest extends SchemaManagerFunctionalTestCase
         $this->assertFalse($table->getColumn('column_binary')->getFixed());
     }
 
+    public function testMaxColsCompositeIndex() {
+
+        $tableA = $this->getTestMaxColsTable('test_max_cols_composite_index_a');
+
+        $colsExpected = $tableA->getPrimaryKey()->getColumns();
+
+        $this->_sm->dropAndCreateTable($tableA);
+
+        $colsActual = $this->_sm->listTableDetails($tableA->getName())
+            ->getPrimaryKey()->getColumns();
+
+        $this->assertEquals($colsExpected, $colsActual);
+
+        $tableB = $this->getTestMaxColsTable('test_max_cols_composite_index_b');
+
+        $tableB->addForeignKeyConstraint(
+            $tableA->getName(), $colsExpected, $colsExpected, array(), 'ctr_max_cols'
+        );
+
+        $this->_sm->dropAndCreateTable($tableB);
+
+        $colsActual = $this->_sm->listTableDetails($tableB->getName())
+          ->getForeignKey('ctr_max_cols')->getColumns();
+
+        $this->assertEquals($colsExpected, $colsActual);
+
+    }
+
+    protected function getTestMaxColsTable($name, $options = array()) {
+
+        $maxCols = 16;
+
+        $table = new \Doctrine\DBAL\Schema\Table($name, array(), array(), array(), false, $options);
+        $table->setSchemaConfig($this->_sm->createSchemaConfig());
+
+        $columnNames = array();
+
+        for ( $i = 0; $i < $maxCols; $i++ ) {
+            $columnName = 'col' . $i;
+            $table->addColumn($columnName, 'integer');
+            $columnNames[] = $columnName;
+        }
+
+        $table->setPrimaryKey($columnNames);
+
+        return $table;
+
+    }
+
 }
