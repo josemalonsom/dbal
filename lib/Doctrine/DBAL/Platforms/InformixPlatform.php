@@ -881,6 +881,15 @@ class InformixPlatform extends AbstractPlatform
 
             /* @var $columnDiff \Doctrine\DBAL\Schema\ColumnDiff */
             $column = $columnDiff->column;
+
+            if ( $columnDiff->oldColumnName != $column->getName() ) {
+
+              $sql[] = $this->getRenameColumnSQL(
+                  $diff->name, $columnDiff->oldColumnName, $column->getName()
+              );
+
+            }
+
             $queryParts[] =  'MODIFY '
                 . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
         }
@@ -891,7 +900,7 @@ class InformixPlatform extends AbstractPlatform
                 continue;
             }
 
-            $sql[] =  'RENAME COLUMN ' . $diff->name . '.' . $oldColumnName . ' TO ' . $column->getQuotedName($this);
+            $sql[] = $this->getRenameColumnSQL($diff->name, $oldColumnName, $column->getName());
         }
 
         $tableSql = array();
@@ -1179,5 +1188,21 @@ class InformixPlatform extends AbstractPlatform
 
         return $sql;
 
+    }
+
+    /**
+     * Gets the SQL to rename a column.
+     *
+     * @param string table that contains the column
+     * @param string old column name
+     * @param string new column name
+     */
+    protected function getRenameColumnSQL($tableName, $oldName, $newName)
+    {
+        $newName = $this->quoteIdentifier($newName);
+        $oldName = $this->quoteIdentifier($oldName);
+        $tableName = $this->quoteIdentifier($tableName);
+
+        return 'RENAME COLUMN ' . $tableName . '.' . $oldName . ' TO ' . $newName;
     }
 }
