@@ -1140,12 +1140,12 @@ class InformixPlatform extends AbstractPlatform
 
             if ( preg_match("/\bADD\s+CONSTRAINT\b/i", $sql) ) {
 
-                $sql = preg_replace("/\bADD\s+CONSTRAINT\s+$constraintName\b/i",
+                $sql = preg_replace("/\s*\bADD\s+CONSTRAINT\s+$constraintName\b\s*/i",
                                     ' ADD CONSTRAINT ', $sql);
             }
             else {
 
-                $sql = preg_replace("/\bCONSTRAINT\s+$constraintName\b/i", '', $sql);
+                $sql = preg_replace("/\s*\bCONSTRAINT\s+$constraintName\b\s*/i", '', $sql);
             }
 
             $sql .= ' CONSTRAINT ' . $constraintName;
