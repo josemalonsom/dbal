@@ -751,6 +751,31 @@ class InformixPlatform extends AbstractPlatform
     }
 
     /**
+     * Converts the boolean values to the string representation used in Informix.
+     *
+     * - false => 'f'
+     * - true  => 't'
+     *
+     * @param mixed $item
+     *
+     * @return mixed
+     */
+    public function convertBooleans($item)
+    {
+        if (is_array($item)) {
+            foreach ($item as $k => $value) {
+                if (is_bool($value)) {
+                    $item[$k] = $value === true ? 't' : 'f';
+                }
+            }
+        } elseif (is_bool($item)) {
+            $item = $item === true ? 't' : 'f';
+        }
+
+        return $item;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getCurrentDateSQL()
