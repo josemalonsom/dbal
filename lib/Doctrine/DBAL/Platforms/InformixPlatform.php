@@ -201,7 +201,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getDateSubHourExpression($date, $hours)
     {
-        return $date . ' - interval(' . $hours . ') hour(9) to hour';
+        return $date . ' - INTERVAL(' . $hours . ') HOUR(9) TO HOUR';
     }
 
     /**
@@ -209,7 +209,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getDateAddDaysExpression($date, $days)
     {
-        return $date . ' + interval(' . $days . ') day(9) to day';
+        return $date . ' + INTERVAL(' . $days . ') DAY(9) TO DAY';
     }
 
     /**
@@ -217,7 +217,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getDateSubDaysExpression($date, $days)
     {
-        return $date . ' - interval(' . $days . ') day(9) to day';
+        return $date . ' - INTERVAL(' . $days . ') DAY(9) TO DAY';
     }
 
     /**
