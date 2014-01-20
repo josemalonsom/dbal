@@ -193,7 +193,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getDateAddHourExpression($date, $hours)
     {
-        return $date . ' + interval(' . $hours . ') hour(9) to hour';
+        return $date . ' + INTERVAL(' . $hours . ') HOUR(9) TO HOUR';
     }
 
     /**
