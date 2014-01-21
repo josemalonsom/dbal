@@ -368,7 +368,8 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getSequenceNextValSQL($sequenceName)
     {
-        return $sequenceName . '.NEXTVAL';
+        return 'SELECT ' . $sequenceName . '.NEXTVAL '
+               . 'FROM systables WHERE tabid = 1';
     }
 
     /**
@@ -1013,6 +1014,14 @@ class InformixPlatform extends AbstractPlatform
         $sql = preg_replace('/SELECT\s+/i', 'SELECT ' . $snippet, $query, 1);
 
         return $sql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsSequences()
+    {
+        return true;
     }
 
     /**

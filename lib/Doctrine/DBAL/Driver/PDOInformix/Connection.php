@@ -40,4 +40,33 @@ class Connection extends PDOConnection
 
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see lastSequenceValue()
+     */
+    public function lastInsertId($name = null)
+    {
+        return is_string($name)
+            ? $this->lastSequenceValue($name)
+            : parent::lastInsertId($name);
+    }
+
+    /**
+     * Returns the last value of a sequence.
+     *
+     * The PDO_INFORMIX driver doesn't returns the last retrieved value of the
+     * sequence when a sequence name is specified in the PDO::lastInsertId()
+     * method, this method provides this functionality executing a SQL 
+     * statement with the CURRVAL operator.
+     *
+     * @link http://php.net/manual/en/pdo.lastinsertid.php
+     * @link http://pic.dhe.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqls.doc/ids_sqs_1461.htm
+     */
+    protected function lastSequenceValue($name)
+    {
+        $sql = 'SELECT ' . $name . '.CURRVAL FROM systables WHERE tabid = 1';
+
+        return $this->query($sql)->fetchColumn(0);
+    }
 }

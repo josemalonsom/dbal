@@ -296,4 +296,15 @@ class InformixSchemaManager extends AbstractSchemaManager
         return $list;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableSequenceDefinition($sequence)
+    {
+        $sequence = array_change_key_case($sequence, \CASE_LOWER);
+
+        return new Sequence(
+            $sequence['sequence'], $sequence['inc_val'], $sequence['start_val']
+        );
+    }
 }
