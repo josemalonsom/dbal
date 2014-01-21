@@ -1044,14 +1044,6 @@ class InformixPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getForUpdateSQL()
-    {
-        return ' ';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getDummySelectSQL()
     {
         return 'SELECT 1 FROM SYSTABLES WHERE TABID = 1';
