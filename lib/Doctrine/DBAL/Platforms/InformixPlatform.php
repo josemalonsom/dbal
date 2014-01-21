@@ -1018,18 +1018,6 @@ class InformixPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getSubstringExpression($value, $from, $length = null)
-    {
-        if ( $length === null ) {
-            return 'SUBSTR(' . $value . ', ' . $from . ')';
-        }
-
-        return 'SUBSTR(' . $value . ', ' . $from . ', ' . $length . ')';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function supportsIdentityColumns()
     {
         return true;
