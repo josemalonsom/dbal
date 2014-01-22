@@ -441,6 +441,16 @@ class InformixPlatformTest extends AbstractPlatformTestCase
         );
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testThrowsExceptionWhenContraintDeclarationHasNoColumns()
+    {
+        $index = new Index('ctr1', array());
+
+        $this->_platform->getUniqueConstraintDeclarationSQL('ctr1', $index);
+    }
+
     public function testReturnsSequenceSQL()
     {
         $sequence = new Sequence('test_seq', 1, 10);
@@ -543,5 +553,17 @@ class InformixPlatformTest extends AbstractPlatformTestCase
         $this->assertTrue($this->_platform->supportsSequences());
         $this->assertTrue($this->_platform->supportsTransactions());
         $this->assertTrue($this->_platform->supportsViews());
+    }
+
+    public function testGeneratesListTableConstraintsSQL()
+    {
+        $this->assertEquals(
+            'SELECT sc.constrid, sc.constrname, sc.owner, sc.tabid, '
+            . 'sc.constrtype, sc.idxname, sc.collation '
+            . 'FROM systables st, sysconstraints sc WHERE '
+            . 'st.tabname = "test_table" '
+            . 'AND st.tabid = sc.tabid',
+            $this->_platform->getListTableConstraintsSQL('test_table')
+        );
     }
 }
