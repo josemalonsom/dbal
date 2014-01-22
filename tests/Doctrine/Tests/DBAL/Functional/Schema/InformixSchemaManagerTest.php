@@ -307,4 +307,12 @@ class InformixSchemaManagerTest extends SchemaManagerFunctionalTestCase
 
     }
 
+    public function testListDatabases()
+    {
+        $databases = $this->_sm->listDatabases();
+
+        $this->assertContains('sysmaster', $databases);
+        $this->assertContains($this->_conn->getDatabase(), $databases);
+    }
+
 }

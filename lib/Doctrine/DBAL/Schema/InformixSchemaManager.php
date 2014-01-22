@@ -307,4 +307,14 @@ class InformixSchemaManager extends AbstractSchemaManager
             $sequence['sequence'], $sequence['inc_val'], $sequence['start_val']
         );
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableDatabaseDefinition($database) {
+
+        $database = array_change_key_case($database, \CASE_LOWER);
+
+        return strtolower(trim($database['name']));
+    }
 }
