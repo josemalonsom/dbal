@@ -80,7 +80,7 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
     {
 
-        $dsn = $this->_constructPdoDsn($params);
+        $dsn = $this->constructPdoDsn($params);
 
         $driverOptions += array(\PDO::ATTR_STRINGIFY_FETCHES => true);
 
@@ -107,7 +107,7 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
      * @throws \Doctrine\DBAL\DBALException
      * @see \Doctrine\DBAL\Driver::connect
      */
-    protected function _constructPdoDsn(array $params)
+    private function constructPdoDsn(array $params)
     {
 
         if ( empty($params['dbname']) ) {
