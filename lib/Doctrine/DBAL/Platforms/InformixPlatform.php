@@ -143,6 +143,14 @@ class InformixPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getEmptyIdentityInsertSQL($tableName, $identifierColumnName)
+    {
+        return 'INSERT INTO ' . $tableName . ' (' . $identifierColumnName . ') VALUES (0)';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getVarcharMaxLength()
     {
         return 255;
