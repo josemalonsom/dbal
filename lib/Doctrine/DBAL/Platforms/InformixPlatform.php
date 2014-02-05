@@ -96,8 +96,8 @@ class InformixPlatform extends AbstractPlatform
     protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed)
     {
         return $fixed
-            ? ($length ? 'CHAR(' . $length . ')' : 'CHAR(255)')
-            : ($length ? 'VARCHAR(' . $length . ')' : 'VARCHAR(255)');
+            ? 'CHAR(' . ($length ? : $this->getVarcharDefaultLength()) . ')'
+            : 'VARCHAR(' . ($length ? : $this->getVarcharDefaultLength()) . ')';
     }
 
     /**
