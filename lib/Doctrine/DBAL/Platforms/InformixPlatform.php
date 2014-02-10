@@ -20,6 +20,7 @@
 namespace Doctrine\DBAL\Platforms;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Constraint;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
@@ -123,13 +124,15 @@ class InformixPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      *
-     * Informix doesn't support table names between quotes so we prevent to use them.
+     * By default Informix doesn't support quoted identifiers, for this to
+     * work you must enable the DELIMIDENT option in your Informix environment.
      *
      * @return string
+     * @link http://www-01.ibm.com/support/knowledgecenter/SSGU8G_12.1.0/com.ibm.sqls.doc/ids_sqs_1667.htm
      */
     public function getIdentifierQuoteCharacter()
     {
-        return '';
+        return '"';
     }
 
     /**
@@ -389,7 +392,7 @@ class InformixPlatform extends AbstractPlatform
             . 'sc.constrid, sc.constrname, sc.owner, sc.tabid, '
             . 'sc.constrtype, sc.idxname, sc.collation '
             . 'FROM systables st, sysconstraints sc WHERE '
-            . 'st.tabname = "' . $table . '" '
+            . 'st.tabname = \'' . $table . '\' '
             . 'AND st.tabid = sc.tabid';
     }
 
@@ -405,40 +408,40 @@ class InformixPlatform extends AbstractPlatform
         return 'SELECT st.tabname, sc.colname, sc.colno, sc.coltype, '
             . 'sc.collength, sd.type typedefault, sd.default, '
             . 'CASE '
-            . '    WHEN sc.coltype IN (0,256)  THEN "char" '
-            . '    WHEN sc.coltype IN (1,257)  THEN "smallint" '
-            . '    WHEN sc.coltype IN (2,258)  THEN "integer" '
-            . '    WHEN sc.coltype IN (3,259)  THEN "float" '
-            . '    WHEN sc.coltype IN (4,260)  THEN "smallfloat" '
-            . '    WHEN sc.coltype IN (5,261)  THEN "decimal" '
-            . '    WHEN sc.coltype IN (6,262)  THEN "serial" '
-            . '    WHEN sc.coltype IN (7,263)  THEN "date" '
-            . '    WHEN sc.coltype IN (8,264)  THEN "money" '
-            . '    WHEN sc.coltype IN (9,265)  THEN "null" '
-            . '    WHEN sc.coltype IN (10,266) THEN "datetime" '
-            . '    WHEN sc.coltype IN (11,267) THEN "byte" '
-            . '    WHEN sc.coltype IN (12,268) THEN "text" '
-            . '    WHEN sc.coltype IN (13,269) THEN "varchar" '
-            . '    WHEN sc.coltype IN (14,270) THEN "interval" '
-            . '    WHEN sc.coltype IN (15,271) THEN "nchar" '
-            . '    WHEN sc.coltype IN (16,272) THEN "nvarchar" '
-            . '    WHEN sc.coltype IN (17,273) THEN "int8" '
-            . '    WHEN sc.coltype IN (18,274) THEN "serial8" '
-            . '    WHEN sc.coltype IN (19,275) THEN "set" '
-            . '    WHEN sc.coltype IN (20,276) THEN "multiset" '
-            . '    WHEN sc.coltype IN (21,277) THEN "list" '
-            . '    WHEN sc.coltype IN (22,278) THEN "row" '
-            . '    WHEN sc.coltype IN (23,279) THEN "collection" '
-            . '    WHEN sc.coltype IN (43,299) THEN "lvarchar" '
-            . '    WHEN sc.coltype IN (45,301) THEN "boolean" '
-            . '    WHEN sc.coltype IN (52,308) THEN "bigint" '
-            . '    WHEN sc.coltype IN (53,309) THEN "bigserial" '
+            . '    WHEN sc.coltype IN (0,256)  THEN \'char\' '
+            . '    WHEN sc.coltype IN (1,257)  THEN \'smallint\' '
+            . '    WHEN sc.coltype IN (2,258)  THEN \'integer\' '
+            . '    WHEN sc.coltype IN (3,259)  THEN \'float\' '
+            . '    WHEN sc.coltype IN (4,260)  THEN \'smallfloat\' '
+            . '    WHEN sc.coltype IN (5,261)  THEN \'decimal\' '
+            . '    WHEN sc.coltype IN (6,262)  THEN \'serial\' '
+            . '    WHEN sc.coltype IN (7,263)  THEN \'date\' '
+            . '    WHEN sc.coltype IN (8,264)  THEN \'money\' '
+            . '    WHEN sc.coltype IN (9,265)  THEN \'null\' '
+            . '    WHEN sc.coltype IN (10,266) THEN \'datetime\' '
+            . '    WHEN sc.coltype IN (11,267) THEN \'byte\' '
+            . '    WHEN sc.coltype IN (12,268) THEN \'text\' '
+            . '    WHEN sc.coltype IN (13,269) THEN \'varchar\' '
+            . '    WHEN sc.coltype IN (14,270) THEN \'interval\' '
+            . '    WHEN sc.coltype IN (15,271) THEN \'nchar\' '
+            . '    WHEN sc.coltype IN (16,272) THEN \'nvarchar\' '
+            . '    WHEN sc.coltype IN (17,273) THEN \'int8\' '
+            . '    WHEN sc.coltype IN (18,274) THEN \'serial8\' '
+            . '    WHEN sc.coltype IN (19,275) THEN \'set\' '
+            . '    WHEN sc.coltype IN (20,276) THEN \'multiset\' '
+            . '    WHEN sc.coltype IN (21,277) THEN \'list\' '
+            . '    WHEN sc.coltype IN (22,278) THEN \'row\' '
+            . '    WHEN sc.coltype IN (23,279) THEN \'collection\' '
+            . '    WHEN sc.coltype IN (43,299) THEN \'lvarchar\' '
+            . '    WHEN sc.coltype IN (45,301) THEN \'boolean\' '
+            . '    WHEN sc.coltype IN (52,308) THEN \'bigint\' '
+            . '    WHEN sc.coltype IN (53,309) THEN \'bigserial\' '
             . '    ELSE '
             . '        CASE '
             . '            WHEN (sc.extended_id > 0) THEN '
             . '                (SELECT LOWER(name) FROM sysxtdtypes WHERE '
             . '                    extended_id = sc.extended_id) '
-            . '            ELSE "unknown"'
+            . '            ELSE \'unknown\''
             . '        END '
             . 'END typename, '
             . 'CASE '
@@ -472,15 +475,15 @@ class InformixPlatform extends AbstractPlatform
             . '        NULL '
             . 'END scale, '
             . 'CASE  '
-            . '    WHEN (sc.coltype < 256) THEN "Y" '
-            . '    WHEN (sc.coltype BETWEEN 256 AND 309) THEN "N" '
+            . '    WHEN (sc.coltype < 256) THEN \'Y\' '
+            . '    WHEN (sc.coltype BETWEEN 256 AND 309) THEN \'N\' '
             . '    ELSE '
             . '        NULL '
             . 'END nulls '
             . 'FROM systables st '
             . 'LEFT OUTER JOIN syscolumns sc ON st.tabid = sc.tabid '
             . 'LEFT OUTER JOIN sysdefaults sd ON (sc.tabid = sd.tabid AND sc.colno = sd.colno) '
-            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '")';
+            . 'WHERE UPPER(st.tabname) = UPPER(\'' . $table . '\')';
     }
 
     /**
@@ -488,7 +491,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getListTablesSQL()
     {
-        return 'SELECT systables.tabname FROM systables WHERE tabtype = "T"';
+        return 'SELECT systables.tabname FROM systables WHERE tabtype = \'T\'';
     }
 
     /**
@@ -507,7 +510,7 @@ class InformixPlatform extends AbstractPlatform
         return 'SELECT '
             . 'systables.tabname viewname, sysviews.seqno, sysviews.viewtext '
             . 'FROM systables, sysviews '
-            . 'WHERE systables.tabtype = "V" '
+            . 'WHERE systables.tabtype = \'V\' '
             . 'AND systables.tabid = sysviews.tabid '
             . 'ORDER BY systables.tabname ASC, sysviews.seqno ASC';
 
@@ -569,8 +572,8 @@ class InformixPlatform extends AbstractPlatform
             . '    ON (ABS(si.part15)= sc15.colno AND si.tabid = sc15.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc16 '
             . '    ON (ABS(si.part16)= sc16.colno AND si.tabid = sc16.tabid) '
-            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '") '
-            . 'AND si.idxname NOT LIKE " " || si.tabid || "_%" '
+            . 'WHERE UPPER(st.tabname) = UPPER(\'' . $table . '\') '
+            . 'AND si.idxname NOT LIKE \' \' || si.tabid || \'_%\' '
             . 'UNION '
             . 'SELECT st.tabname, si.idxname, si.idxtype, '
             . 'ctr.constrname, ctr.constrtype, '
@@ -617,7 +620,7 @@ class InformixPlatform extends AbstractPlatform
             . '    ON (ABS(si.part15)= sc15.colno AND si.tabid = sc15.tabid) '
             . 'LEFT OUTER JOIN syscolumns sc16 '
             . '    ON (ABS(si.part16)= sc16.colno AND si.tabid = sc16.tabid) '
-            . 'WHERE UPPER(st.tabname) = UPPER("' . $table . '") '
+            . 'WHERE UPPER(st.tabname) = UPPER(\'' . $table . '\') '
             . 'AND ctr.idxname IS NOT NULL ';
     }
 
@@ -722,8 +725,8 @@ class InformixPlatform extends AbstractPlatform
             . 'LEFT OUTER JOIN syscolumns pksc16 '
             . '    ON (ABS(refsi.part16)= pksc16.colno AND refsi.tabid = pksc16.tabid)'
             . 'WHERE '
-            . 'UPPER(st.tabname) = UPPER("' . $table . '") '
-            . 'AND sc.constrtype = "R" ';
+            . 'UPPER(st.tabname) = UPPER(\'' . $table . '\') '
+            . 'AND sc.constrtype = \'R\' ';
 
     }
 
@@ -894,7 +897,7 @@ class InformixPlatform extends AbstractPlatform
             if ( $columnDiff->oldColumnName != $column->getName() ) {
 
               $sql[] = $this->getRenameColumnSQL(
-                  $diff->name, $columnDiff->oldColumnName, $column->getName()
+                  $diff->name, $columnDiff->oldColumnName, $column
               );
 
             }
@@ -909,7 +912,7 @@ class InformixPlatform extends AbstractPlatform
                 continue;
             }
 
-            $sql[] = $this->getRenameColumnSQL($diff->name, $oldColumnName, $column->getName());
+            $sql[] = $this->getRenameColumnSQL($diff->name, $oldColumnName, $column);
         }
 
         $tableSql = array();
@@ -1192,14 +1195,11 @@ class InformixPlatform extends AbstractPlatform
      *
      * @param string table that contains the column
      * @param string old column name
-     * @param string new column name
+     * @param Column new column
      */
-    protected function getRenameColumnSQL($tableName, $oldName, $newName)
+    protected function getRenameColumnSQL($tableName, $oldName, Column $column)
     {
-        $newName = $this->quoteIdentifier($newName);
-        $oldName = $this->quoteIdentifier($oldName);
-        $tableName = $this->quoteIdentifier($tableName);
-
-        return 'RENAME COLUMN ' . $tableName . '.' . $oldName . ' TO ' . $newName;
+        return 'RENAME COLUMN ' . $tableName . '.' . $oldName
+            . ' TO ' . $column->getQuotedName($this);
     }
 }

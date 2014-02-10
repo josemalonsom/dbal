@@ -199,6 +199,13 @@ driver instead which does not have this limitation.
 IBM Informix
 --------------------
 
+Quoted Identifiers
+~~~~~~~~~~~~~~~~~~
+
+By default Informix doesn't support quoted identifiers, for this to
+work you must enable the ``DELIMIDENT`` option in your Informix environment.
+
+
 Unique and NULL
 ~~~~~~~~~~~~~~~
 

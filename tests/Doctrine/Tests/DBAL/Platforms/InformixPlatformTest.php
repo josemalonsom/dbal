@@ -62,8 +62,10 @@ class InformixPlatformTest extends AbstractPlatformTestCase
 
     public function getGenerateConstraintForeignKeySql(ForeignKeyConstraint $fk)
     {
+        $quotedForeignTable = $fk->getQuotedForeignTableName($this->_platform);
+
         return 'ALTER TABLE test ADD CONSTRAINT FOREIGN KEY (fk_name) '
-            . 'REFERENCES foreign (id) CONSTRAINT constraint_fk';
+            . 'REFERENCES ' . $quotedForeignTable . ' (id) CONSTRAINT constraint_fk';
     }
 
     public function getBitAndComparisonExpressionSql($value1, $value2)
@@ -89,39 +91,35 @@ class InformixPlatformTest extends AbstractPlatformTestCase
 
     public function getQuotedColumnInPrimaryKeySQL()
     {
+        return array(
+            'CREATE TABLE "quoted" ("create" VARCHAR(255) NOT NULL, '
+            . 'PRIMARY KEY("create"))'
+        );
     }
 
     public function getQuotedColumnInIndexSQL()
     {
+        return array(
+            'CREATE TABLE "quoted" ("create" VARCHAR(255) NOT NULL)',
+            'CREATE INDEX IDX_22660D028FD6E0FB ON "quoted" ("create")'
+        );
     }
 
     public function getQuotedColumnInForeignKeySQL()
     {
-    }
-
-    public function testQuotedColumnInPrimaryKeyPropagation()
-    {
-        $this->skipQuotedIdentifiersTests();
-    }
-
-    public function testQuotedColumnInIndexPropagation()
-    {
-        $this->skipQuotedIdentifiersTests();
-    }
-
-    public function testQuotedColumnInForeignKeyPropagation()
-    {
-        $this->skipQuotedIdentifiersTests();
-    }
-
-    public function testQuotesAlterTableRenameIndex()
-    {
-        $this->skipQuotedIdentifiersTests();
-    }
-
-    protected function skipQuotedIdentifiersTests()
-    {
-        $this->markTestSkipped('By default Informix doesn\'t support quoted identifiers.');
+        return array(
+            'CREATE TABLE "quoted" ("create" VARCHAR(255) NOT NULL, '
+            . 'foo VARCHAR(255) NOT NULL, "bar" VARCHAR(255) NOT NULL)',
+            'ALTER TABLE "quoted" ADD CONSTRAINT FOREIGN KEY ("create", foo, '
+            . '"bar") REFERENCES "foreign" ("create", bar, "foo-bar") '
+            . 'CONSTRAINT FK_WITH_RESERVED_KEYWORD',
+            'ALTER TABLE "quoted" ADD CONSTRAINT FOREIGN KEY ("create", foo, '
+            . '"bar") REFERENCES foo ("create", bar, "foo-bar") '
+            . 'CONSTRAINT FK_WITH_NON_RESERVED_KEYWORD',
+            'ALTER TABLE "quoted" ADD CONSTRAINT FOREIGN KEY ("create", foo, '
+            . '"bar") REFERENCES "foo-bar" ("create", bar, "foo-bar") '
+            . 'CONSTRAINT FK_WITH_INTENDED_QUOTATION'
+        );
     }
 
     public function testReturnsBinaryTypeDeclarationSQL()
@@ -210,7 +208,7 @@ class InformixPlatformTest extends AbstractPlatformTestCase
 
     public function testHasCorrectIdentifierQuoteCharacter()
     {
-        $this->assertSame('', $this->_platform->getIdentifierQuoteCharacter());
+        $this->assertSame('"', $this->_platform->getIdentifierQuoteCharacter());
     }
 
     public function testHasCorrectMaxIdentifierLength()
@@ -561,7 +559,7 @@ class InformixPlatformTest extends AbstractPlatformTestCase
             'SELECT sc.constrid, sc.constrname, sc.owner, sc.tabid, '
             . 'sc.constrtype, sc.idxname, sc.collation '
             . 'FROM systables st, sysconstraints sc WHERE '
-            . 'st.tabname = "test_table" '
+            . 'st.tabname = \'test_table\' '
             . 'AND st.tabid = sc.tabid',
             $this->_platform->getListTableConstraintsSQL('test_table')
         );

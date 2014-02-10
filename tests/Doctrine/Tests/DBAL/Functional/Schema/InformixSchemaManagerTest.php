@@ -91,7 +91,7 @@ class InformixSchemaManagerTest extends SchemaManagerFunctionalTestCase
       $data[][] = array(
           'doctrine_type' => 'boolean',
           'default'       => true,
-          'sql_snippet'   => 'BOOLEAN DEFAULT "T"',
+          'sql_snippet'   => 'BOOLEAN DEFAULT \'T\'',
           'test_name'     => 'boolean',
       );
 
@@ -106,7 +106,7 @@ class InformixSchemaManagerTest extends SchemaManagerFunctionalTestCase
           'default'       => 'DEFAULT VALUE',
           'fixed'         => true,
           'length'        => 20,
-          'sql_snippet'   => 'CHAR(20) DEFAULT "DEFAULT VALUE"',
+          'sql_snippet'   => 'CHAR(20) DEFAULT \'DEFAULT VALUE\'',
           'test_name'     => 'char',
       );
 
