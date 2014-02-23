@@ -808,7 +808,7 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getCurrentTimestampSQL()
     {
-        return 'CURRENT';
+        return 'CURRENT YEAR TO SECOND';
     }
 
     /**

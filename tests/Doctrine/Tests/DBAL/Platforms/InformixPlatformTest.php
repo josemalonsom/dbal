@@ -228,7 +228,7 @@ class InformixPlatformTest extends AbstractPlatformTestCase
         );
 
         $this->assertEquals(
-            'CURRENT',
+            'CURRENT YEAR TO SECOND',
             $this->_platform->getCurrentTimestampSQL()
         );
 
