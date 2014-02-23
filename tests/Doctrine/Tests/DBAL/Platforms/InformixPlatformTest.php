@@ -293,14 +293,15 @@ class InformixPlatformTest extends AbstractPlatformTestCase
      * @expectedExceptionMessage not supported by platform
      * @dataProvider dataProviderTestThrowsNotSupportedExceptions
      */
-    public function testThrowsNotSupportedExceptions($methodName, $param = null)
+    public function testThrowsNotSupportedExceptions($methodName, $p1 = null, $p2 = null)
     {
-        $this->_platform->$methodName($param);
+        $this->_platform->$methodName($p1, $p2);
     }
 
     public function dataProviderTestThrowsNotSupportedExceptions()
     {
         return array(
+            array('getIndexDeclarationSQL', 'idx1', new Index('idx1', array('col1'))),
             array('getListUsersSQL'),
             array('getMd5Expression', 'column'),
             array('getNotExpression', 'expression'),
@@ -427,11 +428,6 @@ class InformixPlatformTest extends AbstractPlatformTestCase
     public function testReturnsIndexDeclarationSQL()
     {
         $index = new Index('idx1', array('col1', 'col2'), false);
-
-        $this->assertEquals(
-            ' UNIQUE (col1, col2) CONSTRAINT idx1',
-            $this->_platform->getIndexDeclarationSQL('idx1', $index)
-        );
 
         $this->assertEquals(
             ' UNIQUE (col1, col2) CONSTRAINT idx1',

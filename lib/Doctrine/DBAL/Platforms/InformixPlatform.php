@@ -816,7 +816,8 @@ class InformixPlatform extends AbstractPlatform
      */
     public function getIndexDeclarationSQL($name, Index $index)
     {
-        return $this->getUniqueConstraintDeclarationSQL($name, $index);
+        // Index declaration in statements like CREATE TABLE is not supported.
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
