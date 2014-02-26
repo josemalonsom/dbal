@@ -19,8 +19,6 @@
 
 namespace Doctrine\DBAL\Driver\DrizzlePDOMySql;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\ExceptionConverterDriver;
 use Doctrine\DBAL\Platforms\DrizzlePlatform;
 use Doctrine\DBAL\Schema\DrizzleSchemaManager;
 
@@ -29,7 +27,7 @@ use Doctrine\DBAL\Schema\DrizzleSchemaManager;
  *
  * @author Kim Hemsø Rasmussen <kimhemsoe@gmail.com>
  */
-class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
+class Driver extends \Doctrine\DBAL\Driver\PDOMySql\Driver
 {
     /**
      * {@inheritdoc}
@@ -37,38 +35,21 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
     {
         $conn = new Connection(
-            $this->_constructPdoDsn($params),
+            $this->constructPdoDsn($params),
             $username,
             $password,
             $driverOptions
         );
+
         return $conn;
     }
 
     /**
-     * Constructs the Drizzle MySql PDO DSN.
-     *
-     * @param array $params
-     *
-     * @return string The DSN.
+     * {@inheritdoc}
      */
-    private function _constructPdoDsn(array $params)
+    public function createDatabasePlatformForVersion($version)
     {
-        $dsn = 'mysql:';
-        if (isset($params['host']) && $params['host'] != '') {
-            $dsn .= 'host=' . $params['host'] . ';';
-        }
-        if (isset($params['port'])) {
-            $dsn .= 'port=' . $params['port'] . ';';
-        }
-        if (isset($params['dbname'])) {
-            $dsn .= 'dbname=' . $params['dbname'] . ';';
-        }
-        if (isset($params['unix_socket'])) {
-            $dsn .= 'unix_socket=' . $params['unix_socket'] . ';';
-        }
-
-        return $dsn;
+        return $this->getDatabasePlatform();
     }
 
     /**
@@ -93,55 +74,5 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     public function getName()
     {
         return 'drizzle_pdo_mysql';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDatabase(\Doctrine\DBAL\Connection $conn)
-    {
-        $params = $conn->getParams();
-
-        return $params['dbname'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function convertExceptionCode(\Exception $exception)
-    {
-        switch ($exception->getCode()) {
-            case "42000":
-                return DBALException::ERROR_SYNTAX;
-
-            case "42S02":
-                return DBALException::ERROR_UNKNOWN_TABLE;
-
-            case "42S01":
-                return DBALException::ERROR_TABLE_ALREADY_EXISTS;
-
-            case "42S22":
-                return DBALException::ERROR_BAD_FIELD_NAME;
-
-            case "23000":
-                if (strpos($exception->getMessage(), 'Duplicate entry') !== false) {
-                    return DBALException::ERROR_DUPLICATE_KEY;
-                }
-
-                if (strpos($exception->getMessage(), 'Cannot delete or update a parent row: a foreign key constraint fails') !== false) {
-                    return DBALException::ERROR_FOREIGN_KEY_CONSTRAINT;
-                }
-
-                if (strpos($exception->getMessage(), ' cannot be null')) {
-                    return DBALException::ERROR_NOT_NULL;
-                }
-
-                if (strpos($exception->getMessage(), 'in field list is ambiguous') !== false) {
-                    return DBALException::ERROR_NON_UNIQUE_FIELD_NAME;
-                }
-                break;
-        }
-
-        return 0;
     }
 }

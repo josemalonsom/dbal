@@ -19,11 +19,8 @@
 
 namespace Doctrine\DBAL\Driver\SQLAnywhere;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\ExceptionConverterDriver;
-use Doctrine\DBAL\Platforms\SQLAnywhere12Platform;
-use Doctrine\DBAL\Schema\SQLAnywhereSchemaManager;
+use Doctrine\DBAL\Driver\AbstractSQLAnywhereDriver;
 
 /**
  * A Doctrine DBAL driver for the SAP Sybase SQL Anywhere PHP extension.
@@ -32,7 +29,7 @@ use Doctrine\DBAL\Schema\SQLAnywhereSchemaManager;
  * @link   www.doctrine-project.org
  * @since  2.5
  */
-class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
+class Driver extends AbstractSQLAnywhereDriver
 {
     /**
      * {@inheritdoc}
@@ -74,72 +71,10 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
 
     /**
      * {@inheritdoc}
-     *
-     * @link http://dcx.sybase.com/index.html#sa160/en/saerrors/sqlerror.html
-     */
-    public function convertExceptionCode(\Exception $exception)
-    {
-        switch ($exception->getCode()) {
-            case '-100':
-            case '-103':
-            case '-832':
-                return DBALException::ERROR_ACCESS_DENIED;
-            case '-143':
-                return DBALException::ERROR_BAD_FIELD_NAME;
-            case '-193':
-            case '-196':
-                return DBALException::ERROR_DUPLICATE_KEY;
-            case '-198':
-                return DBALException::ERROR_FOREIGN_KEY_CONSTRAINT;
-            case '-144':
-                return DBALException::ERROR_NON_UNIQUE_FIELD_NAME;
-            case '-184':
-            case '-195':
-                return DBALException::ERROR_NOT_NULL;
-            case '-131':
-                return DBALException::ERROR_SYNTAX;
-            case '-110':
-                return DBALException::ERROR_TABLE_ALREADY_EXISTS;
-            case '-141':
-            case '-1041':
-                return DBALException::ERROR_UNKNOWN_TABLE;
-        }
-
-        return 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDatabase(Connection $conn)
-    {
-        $params = $conn->getParams();
-
-        return $params['dbname'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDatabasePlatform()
-    {
-        return new SQLAnywhere12Platform();
-    }
-
-    /**
-     * {@inheritdoc}
      */
     public function getName()
     {
         return 'sqlanywhere';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSchemaManager(Connection $conn)
-    {
-        return new SQLAnywhereSchemaManager($conn);
     }
 
     /**

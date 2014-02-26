@@ -142,6 +142,14 @@ class SQLServerPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function supportsColumnCollation()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function hasNativeGuidType()
     {
         return true;
@@ -1145,9 +1153,17 @@ class SQLServerPlatform extends AbstractPlatform
         $query   = preg_replace('/\s+ORDER\s+BY\s+([^\)]*)/', '', $query); //Remove ORDER BY from $query
         $format  = 'SELECT * FROM (%s) AS doctrine_tbl WHERE doctrine_rownum BETWEEN %d AND %d';
 
+        // Pattern to match "main" SELECT ... FROM clause (including nested parentheses in select list).
+        $selectFromPattern = '/^(\s*SELECT\s+(?:\((?>[^()]+)|(?:R)*\)|[^(])+)\sFROM\s/i';
+
         if ( ! $orderBy) {
-            //Replace only first occurrence of FROM with OVER to prevent changing FROM also in subqueries.
-            $query = preg_replace('/\sFROM\s/i', ', ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS doctrine_rownum FROM ', $query, 1);
+            //Replace only "main" FROM with OVER to prevent changing FROM also in subqueries.
+            $query = preg_replace(
+                $selectFromPattern,
+                '$1, ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS doctrine_rownum FROM ',
+                $query,
+                1
+            );
 
             return sprintf($format, $query, $start, $end);
         }
@@ -1197,7 +1213,7 @@ class SQLServerPlatform extends AbstractPlatform
 
         //Replace only first occurrence of FROM with $over to prevent changing FROM also in subqueries.
         $over  = 'ORDER BY ' . implode(', ', $overColumns);
-        $query = preg_replace('/\sFROM\s/i', ", ROW_NUMBER() OVER ($over) AS doctrine_rownum FROM ", $query, 1);
+        $query = preg_replace($selectFromPattern, "$1, ROW_NUMBER() OVER ($over) AS doctrine_rownum FROM ", $query, 1);
 
         return sprintf($format, $query, $start, $end);
     }
@@ -1347,21 +1363,19 @@ class SQLServerPlatform extends AbstractPlatform
      */
     public function appendLockHint($fromClause, $lockMode)
     {
-        switch ($lockMode) {
-            case LockMode::NONE:
-                $lockClause = ' WITH (NOLOCK)';
-                break;
-            case LockMode::PESSIMISTIC_READ:
-                $lockClause = ' WITH (HOLDLOCK, ROWLOCK)';
-                break;
-            case LockMode::PESSIMISTIC_WRITE:
-                $lockClause = ' WITH (UPDLOCK, ROWLOCK)';
-                break;
-            default:
-                $lockClause = '';
-        }
+        switch (true) {
+            case LockMode::NONE === $lockMode:
+                return $fromClause . ' WITH (NOLOCK)';
 
-        return $fromClause . $lockClause;
+            case LockMode::PESSIMISTIC_READ === $lockMode:
+                return $fromClause . ' WITH (HOLDLOCK, ROWLOCK)';
+
+            case LockMode::PESSIMISTIC_WRITE === $lockMode:
+                return $fromClause . ' WITH (UPDLOCK, ROWLOCK)';
+
+            default:
+                return $fromClause;
+        }
     }
 
     /**
@@ -1434,14 +1448,6 @@ class SQLServerPlatform extends AbstractPlatform
 
     /**
      * {@inheritdoc}
-     */
-    public function getColumnCollationDeclarationSQL($collation)
-    {
-        return 'COLLATE ' . $collation;
-    }
-
-    /**
-     * {@inheritdoc}
      *
      * Modifies column declaration order as it differs in Microsoft SQL Server.
      */
@@ -1450,8 +1456,8 @@ class SQLServerPlatform extends AbstractPlatform
         if (isset($field['columnDefinition'])) {
             $columnDef = $this->getCustomTypeDeclarationSQL($field);
         } else {
-            $collation = (isset($field['collate']) && $field['collate']) ?
-                ' ' . $this->getColumnCollationDeclarationSQL($field['collate']) : '';
+            $collation = (isset($field['collation']) && $field['collation']) ?
+                ' ' . $this->getColumnCollationDeclarationSQL($field['collation']) : '';
 
             $notnull = (isset($field['notnull']) && $field['notnull']) ? ' NOT NULL' : '';
 

@@ -52,7 +52,8 @@ class SQLAnywherePlatformTest extends AbstractPlatformTestCase
     public function getGenerateTableWithMultiColumnUniqueIndexSql()
     {
         return array(
-            'CREATE TABLE test (foo VARCHAR(255) DEFAULT NULL, bar VARCHAR(255) DEFAULT NULL, CONSTRAINT UNIQ_D87F7E0C8C73652176FF8CAA UNIQUE (foo, bar))',
+            'CREATE TABLE test (foo VARCHAR(255) DEFAULT NULL, bar VARCHAR(255) DEFAULT NULL)',
+            'CREATE UNIQUE INDEX UNIQ_D87F7E0C8C73652176FF8CAA ON test (foo, bar)'
         );
     }
 
@@ -220,29 +221,28 @@ class SQLAnywherePlatformTest extends AbstractPlatformTestCase
         );
     }
 
-    public function testAppendsLockHints()
+    /**
+     * @dataProvider getLockHints
+     */
+    public function testAppendsLockHint($lockMode, $lockHint)
     {
-        $fromClause = 'SELECT * FROM lock_hints';
+        $fromClause = 'FROM users';
+        $expectedResult = $fromClause . $lockHint;
 
-        $this->assertEquals(
-            $fromClause . ' WITH (NOLOCK)',
-            $this->_platform->appendLockHint($fromClause, LockMode::NONE)
-        );
-        $this->assertEquals(
-            $fromClause . ' WITH (UPDLOCK)',
-            $this->_platform->appendLockHint($fromClause, LockMode::PESSIMISTIC_READ)
-        );
-        $this->assertEquals(
-            $fromClause . ' WITH (XLOCK)',
-            $this->_platform->appendLockHint($fromClause, LockMode::PESSIMISTIC_WRITE)
-        );
+        $this->assertSame($expectedResult, $this->_platform->appendLockHint($fromClause, $lockMode));
     }
 
-    public function testCannotAppendInvalidLockHint()
+    public function getLockHints()
     {
-        $this->setExpectedException('\InvalidArgumentException');
-
-        $this->_platform->appendLockHint('SELECT * FROM lock_hints', 'invalid_lock_mode');
+        return array(
+            array(null, ''),
+            array(false, ''),
+            array(true, ''),
+            array(LockMode::NONE, ' WITH (NOLOCK)'),
+            array(LockMode::OPTIMISTIC, ''),
+            array(LockMode::PESSIMISTIC_READ, ' WITH (UPDLOCK)'),
+            array(LockMode::PESSIMISTIC_WRITE, ' WITH (XLOCK)'),
+        );
     }
 
     public function testHasCorrectMaxIdentifierLength()

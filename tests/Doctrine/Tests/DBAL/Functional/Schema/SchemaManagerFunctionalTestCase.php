@@ -250,6 +250,7 @@ class SchemaManagerFunctionalTestCase extends \Doctrine\Tests\DbalFunctionalTest
         }
 
         $offlineTable = $this->createListTableColumns();
+        $this->_sm->dropAndCreateTable($offlineTable);
         $onlineTable = $this->_sm->listTableDetails('list_table_columns');
 
         $comparator = new \Doctrine\DBAL\Schema\Comparator();
@@ -493,6 +494,28 @@ class SchemaManagerFunctionalTestCase extends \Doctrine\Tests\DbalFunctionalTest
         $inferredTable = $this->_sm->listTableDetails('test_autoincrement');
         $this->assertTrue($inferredTable->hasColumn('id'));
         $this->assertTrue($inferredTable->getColumn('id')->getAutoincrement());
+    }
+
+    /**
+     * @group DBAL-792
+     */
+    public function testAutoincrementDetectionMulticolumns()
+    {
+        if (!$this->_sm->getDatabasePlatform()->supportsIdentityColumns()) {
+            $this->markTestSkipped('This test is only supported on platforms that have autoincrement');
+        }
+
+        $table = new \Doctrine\DBAL\Schema\Table('test_not_autoincrement');
+        $table->setSchemaConfig($this->_sm->createSchemaConfig());
+        $table->addColumn('id', 'integer');
+        $table->addColumn('other_id', 'integer');
+        $table->setPrimaryKey(array('id', 'other_id'));
+
+        $this->_sm->createTable($table);
+
+        $inferredTable = $this->_sm->listTableDetails('test_not_autoincrement');
+        $this->assertTrue($inferredTable->hasColumn('id'));
+        $this->assertFalse($inferredTable->getColumn('id')->getAutoincrement());
     }
 
     /**
