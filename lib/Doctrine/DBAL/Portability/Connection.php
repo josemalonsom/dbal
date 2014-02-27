@@ -80,7 +80,7 @@ class Connection extends \Doctrine\DBAL\Connection
                     $params['portability'] = self::PORTABILITY_DB2;
                 } elseif ($this->getDatabasePlatform()->getName() === 'mssql') {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_SQLSRV;
-                } else if ($this->_platform->getName() === 'informix') {
+                } elseif ($this->getDatabasePlatform()->getName() === 'informix') {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_INFORMIX;
                 } else {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_OTHERVENDORS;

@@ -19,9 +19,8 @@
 
 namespace Doctrine\DBAL\Driver\PDOInformix;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\ExceptionConverterDriver;
+use Doctrine\DBAL\Driver\AbstractInformixDriver;
 
 /**
  * Driver for the PDO Informix extension.
@@ -29,7 +28,7 @@ use Doctrine\DBAL\Driver\ExceptionConverterDriver;
  * @author Jose M. Alonso M.  <josemalonsom@yahoo.es>
  * @link   www.doctrine-project.org
  */
-class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
+class Driver extends AbstractInformixDriver
 {
 
     /**
@@ -39,7 +38,7 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
      *
      * - 'dbname': The name of the database to connect to.
      * - 'host': The host name of the database to connect to.
-     * - 'port': The port of the database to connecto to (optional, some
+     * - 'port': The port of the database to connect to (optional, some
      *           protocols do not use port, e.g. ipcshm).
      * - 'protocol': The protocol to use in the connection.
      * - 'server': The server name of the database to connect to.
@@ -151,97 +150,9 @@ class Driver implements \Doctrine\DBAL\Driver, ExceptionConverterDriver
     /**
      * {@inheritdoc}
      */
-    public function getDatabasePlatform()
-    {
-        return new \Doctrine\DBAL\Platforms\InformixPlatform;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSchemaManager(Connection $conn)
-    {
-        return new \Doctrine\DBAL\Schema\InformixSchemaManager($conn);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return 'pdo_informix';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getDatabase(\Doctrine\DBAL\Connection $conn)
-    {
-        $params = $conn->getParams();
-
-        return $params['dbname'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function convertExceptionCode(\Exception $exception)
-    {
-
-        if ( $exception instanceof \PDOException && $exception->errorInfo[1] !== null ) {
-            $errorCode = $exception->errorInfo[1];
-        }
-        else {
-            $errorCode = $exception->getCode();
-        }
-
-        switch ( $errorCode ) {
-            case '-239':
-            case '-268':
-                return DBALException::ERROR_DUPLICATE_KEY;
-            case '-206':
-                return DBALException::ERROR_UNKNOWN_TABLE;
-            case '-310':
-                return DBALException::ERROR_TABLE_ALREADY_EXISTS;
-            case '-692':
-                return DBALException::ERROR_FOREIGN_KEY_CONSTRAINT;
-            case '-391':
-                return DBALException::ERROR_NOT_NULL;
-            case '-217':
-                return DBALException::ERROR_BAD_FIELD_NAME;
-            case '-324':
-                return DBALException::ERROR_NON_UNIQUE_FIELD_NAME;
-            case '-201':
-                return DBALException::ERROR_SYNTAX;
-            case '-908':
-            case '-930':
-            case '-951':
-                return DBALException::ERROR_ACCESS_DENIED;
-        }
-
-        // In some cases the exception doesn't have the driver-specific error code
-
-        if ( self::isErrorAccessDeniedMessage($exception->getMessage()) ) {
-            return DBALException::ERROR_ACCESS_DENIED;
-        }
-
-        return 0;
-    }
-
-    /**
-     * Checks if a message means an "access denied error".
-     *
-     * @param string
-     * @return boolean
-     */
-    protected static function isErrorAccessDeniedMessage($message)
-    {
-        if ( strpos($message, 'Incorrect password or user') !== false ||
-            strpos($message, 'Cannot connect to database server') !== false ||
-            preg_match('/Attempt to connect to database server (.*) failed/', $message) ) {
-            return true;
-        }
-
-        return false;
-    }
 }

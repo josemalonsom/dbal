@@ -69,4 +69,26 @@ class Connection extends PDOConnection
 
         return $this->query($sql)->fetchColumn(0);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function requiresQueryForServerVersion()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * The version string is retrieved with the dbinfo() function
+     * since the PDO_INFORMIX extension doesn't support the
+     * PDO::ATTR_SERVER_VERSION attribute.
+     */
+    public function getServerVersion()
+    {
+        return $this->query(
+            'SELECT DBINFO(\'version\', \'full\') FROM systables WHERE tabid = 1'
+        )->fetchColumn(0);
+    }
 }
