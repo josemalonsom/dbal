@@ -19,6 +19,7 @@
 
 namespace Doctrine\DBAL\Driver;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\InformixPlatform;
@@ -125,9 +126,25 @@ abstract class AbstractInformixDriver implements Driver, ExceptionConverterDrive
 
     /**
      * {@inheritdoc}
+     *
+     * @see http://www-01.ibm.com/support/knowledgecenter/SSGU8G_11.50.0/com.ibm.sqls.doc/ids_sqs_1491.htm
      */
     public function createDatabasePlatformForVersion($version)
     {
+        $regex = '/^(?P<server_type>.*)
+            (?i:\s+Version\s+)
+            (?P<major>\d+)\.
+            (?P<minor>\d+)\.
+            (?P<so>F|H|T|U)
+            (?P<level>[[:alnum:]]+)/x';
+
+        if ( ! preg_match($regex, $version, $versionParts) ) {
+            throw DBALException::invalidPlatformVersionSpecified(
+                $version,
+                '<server_type> Version <major>.<minor><os><level>'
+            );
+        }
+
         // Right now only exists one platform for all versions
         return $this->getDatabasePlatform();
     }
