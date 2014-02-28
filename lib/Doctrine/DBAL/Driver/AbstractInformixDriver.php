@@ -63,14 +63,8 @@ abstract class AbstractInformixDriver implements Driver, ExceptionConverterDrive
      */
     public function convertException($message, DriverException $exception)
     {
-        if ( $exception instanceof \PDOException && $exception->errorInfo[1] !== null ) {
-            $errorCode = $exception->errorInfo[1];
-        }
-        else {
-            $errorCode = $exception->getCode();
-        }
 
-        switch ( $errorCode ) {
+        switch ( $exception->getErrorCode() ) {
             case '-239':
             case '-268':
                 return new Exception\UniqueConstraintViolationException($message, $exception);
